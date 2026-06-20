@@ -9,5 +9,9 @@ def get_timeseries(curr_symbol,start,end,interval):
     data = data.reset_index()
     data = data[["Date","Close"]]
     data = data.rename(columns={"Date": "date", "Close": "rate"})
+    # Need to figure out, how to normalize the dataframe
+    #result = data.reset_index(level=2,col_level=2,drop=True)
+    #result = result[["Date", "Close"]]
+    #result = result.rename(columns={"Date": "date", "Close": "rate"})
     result = data.copy()
     return result
