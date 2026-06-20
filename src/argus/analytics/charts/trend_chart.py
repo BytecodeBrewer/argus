@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import pandas as pd
 from argus.services.timeseries_service import prepare_trend_analysis
 
 
