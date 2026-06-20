@@ -31,10 +31,8 @@ def create_trendchart(curr_symbol: str, start:str,end:str,interval:str):
         Minimum and maximum exchange-rate values are marked with scatter
         points and annotations.
     """
-    result = prepare_trend_analysis(curr_symbol,start,end,interval)
-    if result is None:
-        return None
-    df, min_max_rates = result
+
+    df, min_max_rates = prepare_trend_analysis(curr_symbol,start,end,interval)
     min_date = min_max_rates["min_date"][0]
     min_rate = min_max_rates["min_rate"][0]
     max_date = min_max_rates["max_date"][0]

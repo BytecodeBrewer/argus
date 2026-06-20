@@ -77,9 +77,9 @@ def show_trend() -> None:
     global trend_canvas
     global trend_chart_widget
 
-    curr_symbol = "EURUSD=X"
-    start="2024-01-01"
-    end="2025-01-01"
+    curr_symbol = "EURUSD=X",
+    start="2024-01-01",
+    end="2024-02-01",
     interval="1d"
 
     calc_frame.pack_forget()
@@ -92,15 +92,13 @@ def show_trend() -> None:
 
     if trend_canvas is None:
         fig = create_trendchart(curr_symbol,start,end,interval)
-        if fig is None:
-            return None
         fig.set_size_inches(7, 4)
 
         trend_canvas = FigureCanvasTkAgg(fig, master=content)
         trend_chart_widget = trend_canvas.get_tk_widget()
 
     if trend_chart_widget is None:
-        return None
+        return
     trend_canvas.draw()
     trend_chart_widget.pack(fill=tk.BOTH, expand=True)
 
