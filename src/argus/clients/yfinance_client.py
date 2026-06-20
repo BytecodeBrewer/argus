@@ -3,22 +3,6 @@ import logging
 
 
 def get_timeseries(curr_symbol, start, end, interval):
-    """
-    Fetch historical exchange-rate time series data from Yahoo Finance.
-
-    Args:
-        curr_symbol (str): Currency symbol used by Yahoo Finance, for example
-            "EURUSD=X".
-        start (str): Start date of the requested time range in YYYY-MM-DD format.
-        end (str): End date of the requested time range in YYYY-MM-DD format.
-        interval (str): Data interval supported by Yahoo Finance, for example
-            "1d", "1h", or "15m".
-
-    Returns:
-        pandas.DataFrame | None: A DataFrame containing the columns ``date`` and
-        ``rate`` if data was successfully fetched. Returns ``None`` if the
-        request fails, returns no data, or an exception occurs.
-    """
     try:
         yf_logger = logging.getLogger("yfinance")
         yf_logger.disabled = True
@@ -41,3 +25,6 @@ def get_timeseries(curr_symbol, start, end, interval):
         return data
     except Exception:
         return None
+
+
+get_timeseries("EURUSD=X", "2024-01-01", "2024-01-02", "1m")

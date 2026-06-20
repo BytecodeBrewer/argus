@@ -11,25 +11,15 @@ def prepare_trend_analysis(
     curr_symbol: str, start: str, end: str, intervall: str
 ) -> tuple[pd.DataFrame, dict] | None:
     """
-    Prepare time-series data for trend analysis.
+    Prepares the data for trend analysis by adding conversion rates, daily percentage change, and rolling average.
 
-    Fetches historical exchange-rate data for the given currency symbol and
-    enriches it with daily percentage changes and a rolling average. It also
-    calculates the minimum and maximum exchange rates for the resulting time
-    series.
+    Arg1: mock_curr: str - the currency code for which the trend analysis is to
+    be performed
+    Arg2: df: pd.DataFrame - the DataFrame containing the dates for which the
+    conversion rates are to be added
 
-    Args:
-        curr_symbol (str): Currency symbol used by Yahoo Finance, for example
-            "EURUSD=X".
-        start (str): Start date of the requested time range in YYYY-MM-DD format.
-        end (str): End date of the requested time range in YYYY-MM-DD format.
-        intervall (str): Data interval supported by Yahoo Finance, for example
-            "1d", "1h", or "15m".
-
-    Returns:
-        tuple[pd.DataFrame, dict] | None: A tuple containing the prepared
-        DataFrame and a dictionary with minimum and maximum rates. Returns
-        ``None`` if no time-series data could be fetched.
+    Return: tuple[pd.DataFrame, dict] - a tuple containing the updated DataFrame with conversion rates,
+    daily percentage change, and rolling average, and a dictionary with the minimum and maximum rates
     """
 
     df = get_timeseries(curr_symbol, start, end, intervall)
