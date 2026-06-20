@@ -3,7 +3,7 @@ import pandas as pd
 from argus.services.timeseries_service import prepare_trend_analysis
 
 
-def create_trendchart(curr_symbol: str, start:str,end:str,interval:str):
+def create_trendchart(curr: str, dates: pd.DataFrame):
     """
     Create a trend chart for exchange-rate analysis.
 
@@ -31,8 +31,8 @@ def create_trendchart(curr_symbol: str, start:str,end:str,interval:str):
         Minimum and maximum exchange-rate values are marked with scatter
         points and annotations.
     """
-
-    df, min_max_rates = prepare_trend_analysis(curr_symbol,start,end,interval)
+    df = pd.DataFrame()
+    df, min_max_rates = prepare_trend_analysis(curr, dates)
     min_date = min_max_rates["min_date"][0]
     min_rate = min_max_rates["min_rate"][0]
     max_date = min_max_rates["max_date"][0]

@@ -1,5 +1,5 @@
 import pandas as pd
-from argus.clients.yfinancy_client import get_timeseries
+from argus.clients.mock_client import get_mock_timeseries
 from argus.analytics.metrics.trend_metrics import (
     add_rolling_average,
     add_daily_percentage_change,
@@ -7,7 +7,9 @@ from argus.analytics.metrics.trend_metrics import (
 )
 
 
-def prepare_trend_analysis(curr_symbol: str, start:str,end:str,intervall:str) -> tuple[pd.DataFrame, dict] | None:
+def prepare_trend_analysis(
+    mock_curr: str, df: pd.DataFrame
+) -> tuple[pd.DataFrame, dict]:
     """
     Prepares the data for trend analysis by adding conversion rates, daily percentage change, and rolling average.
 
@@ -19,10 +21,11 @@ def prepare_trend_analysis(curr_symbol: str, start:str,end:str,intervall:str) ->
     Return: tuple[pd.DataFrame, dict] - a tuple containing the updated DataFrame with conversion rates,
     daily percentage change, and rolling average, and a dictionary with the minimum and maximum rates
     """
-    
-    df = get_timeseries(curr_symbol, start,end,intervall)
-    if df is None:
-        return None
+    df["rate"] = 0.0
+    # For each date one API call to get the rate
+    for i in range(len(df)):
+        date = str(df.loc[i, "date"])
+        df.loc[i, "rate"] = get_mock_timeseries(mock_curr, date)
     df = add_daily_percentage_change(df)
     df = add_rolling_average(df)
     min_max_rates = get_min_max_rates(df)
