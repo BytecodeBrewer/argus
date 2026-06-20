@@ -33,7 +33,6 @@ def show_menu() -> None:
 
     menu_frame.pack(side="right", fill=tk.BOTH, expand=True)
 
-
 def show_trend() -> None:
     """
     Displays the trend chart in the application. It prepares the data for trend analysis,

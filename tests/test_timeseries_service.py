@@ -22,7 +22,7 @@ def test_get_a_full_timeseries():
         "max_date": ["2024-01-01 00:00:00"],
         "max_rate": [1.1055831909179688],
     }
-    result = prepare_trend_analysis(test_curr, test_start, test_end, test_interval)
+    result = prepare_trend_analysis(test_curr, test_start,test_end,test_interval)
     if result is None:
         return False
     result_df, result_dict = result
