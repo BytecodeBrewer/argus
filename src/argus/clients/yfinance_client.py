@@ -26,5 +26,5 @@ def get_timeseries(curr_symbol, start, end, interval):
     except Exception:
         return None
 
-
-get_timeseries("EURUSD=X", "2024-01-01", "2024-01-02", "1m")
+    
+get_timeseries("EURUSD=X","2024-01-01","2024-01-02","1m")
