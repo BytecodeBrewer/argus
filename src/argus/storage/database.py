@@ -63,20 +63,31 @@ def initialize_database(database_path: str) -> None:
     connection.close()
 
 
-def insert_data_source(database_path: str, source: DataSource) -> None:
+def upsert_source(db: str, source: DataSource) -> int | None:
     insert_query = """
     INSERT INTO data_sources (name, provider_kind, requires_api_key)
     VALUES (?,?,?);
     """
-    connection = duckdb.connect(database_path)
+    search_query = """
+    SELECT id FROM data_sources
+    WHERE name=?
+    """
+    result = duckdb.execute(
+        query=search_query,
+        parameters=[source.name],
+    ).fetchone()
+    if result is not None:
+        return result[0]
+    connection = duckdb.connect(db)
     connection.execute(
         query=insert_query,
         parameters=[source.name, source.provider_kind, source.requires_api_key],
     )
     connection.close()
+    return None
 
 
-def insert_instrument(database_path: str, instrument: Instrument) -> None:
+def upsert_instrument(db: str, instrument: Instrument) -> None:
     insert_query = """
     INSERT INTO instruments (
         symbol,
@@ -88,48 +99,35 @@ def insert_instrument(database_path: str, instrument: Instrument) -> None:
         quote_currency)
     VALUES (?,?,?,?,?,?,?);
     """
-
-    connection = duckdb.connect(database_path)
-    connection.execute(
-        query=insert_query,
-        parameters=[instrument.symbol, instrument.name, instrument.asset_class],
-    )
-    connection.close()
-
-
-def get_data_source_id(database_path: str, source: DataSource) -> int | None:
-    search_query = """
-    SELECT id FROM data_sources
-    WHERE name=?
-    """
-    connection = duckdb.connect(database_path)
-    result = connection.execute(
-        query=search_query,
-        parameters=[source.name],
-    ).fetchone()
-    connection.close()
-    if result is None:
-        return None
-    return result[0]
-
-
-def get_instrument_id(database_path: str, instrument: Instrument) -> int | None:
     search_query = """
     SELECT id FROM instruments
-    WHERE name=?
+    WHERE symbol=?
     """
-    connection = duckdb.connect(database_path)
-    result = connection.execute(
+
+    result = duckdb.execute(
         query=search_query,
-        parameters=[instrument.name],
+        parameters=[instrument.symbol],
     ).fetchone()
+    if result is not None:
+        return result[0]
+    connection = duckdb.connect(db)
+    connection.execute(
+        query=insert_query,
+        parameters=[
+            instrument.symbol,
+            instrument.name,
+            instrument.asset_class,
+            instrument.currency,
+            instrument.exchange,
+            instrument.base_currency,
+            instrument.quote_currency,
+        ],
+    )
     connection.close()
-    if result is None:
-        return None
-    return result[0]
+    return None
 
 
-def insert_price_bar(database_path: str, price_bar: PriceBar) -> None:
+def insert_price_bar(db: str, price_bar: PriceBar) -> None:
     insert_query = """
         INSERT INTO price_bars (
             source_id,
@@ -145,11 +143,9 @@ def insert_price_bar(database_path: str, price_bar: PriceBar) -> None:
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
-    source_id = get_data_source_id(database_path, price_bar.source)
-    instrument_id = get_instrument_id(database_path, price_bar.instrument)
-
-    connection = duckdb.connect(database_path)
-
+    connection = duckdb.connect(db)
+    source_id = upsert_source(db, price_bar.source)
+    instrument_id = upsert_instrument(db, price_bar.instrument)
     if source_id is None:
         connection.close()
         raise ValueError("Data source does not exist in storage.")
