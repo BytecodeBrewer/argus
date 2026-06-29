@@ -1,42 +1,50 @@
 import duckdb
 
+
 def initialize_database(database_path: str) -> None:
+    create_data_sources_sequence = """
+    CREATE SEQUENCE IF NOT EXISTS data_sources_id_seq;
+    """
     create_datasources_table = """ 
     CREATE TABLE IF NOT EXISTS data_sources (
-        id INTEGER PRIMARY_KEY,
-        name TEXT,
-        provider_kind TEXT,
-        requires_api_key: BOOLEAN DEFAULTS:False
-    )
+        id INTEGER PRIMARY KEY DEFAULT keyval('data_sources_id_seq'),
+        name TEXT NOT NULL UNIQUE,
+        provider_kind TEXT NOT NULL,
+        requires_api_key BOOLEAN NOT NULL
+    );
     """
-    create_intstrument_table = """
-        CREATE TABLE IF NOT EXISTS instrument (
-        id INTEGER PRIMARY_KEY,
-        name TEXT,
-        asset_class TEXT,
-        currency TEXT or NONE DEFAULTS: NONE,
-        exchange TEXT or NONE DEFAULTS: NONE,
-        base_currency TEXT or NONE DEFAULTS: NONE,
-        quote_currency TEXT or NONE DEFAULTS: NONE
-    )
+    create_intstruments_table = """
+        CREATE TABLE IF NOT EXISTS instruments (
+        id INTEGER PRIMARY KEY DEFAULT keyval('data_sources_id_seq'),
+        symbol TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        asset_class TEXT NOT NULL,
+        currency TEXT,
+        exchange TEXT,
+        base_currency TEXT,
+        quote_currency TEXT
+    );
     """
-    create_price_bar_table = """
-        CREATE TABLE IF NOT EXISTS price_bar (
-        id INTEGER PRIMARY_KEY,
-        source_id FOREIGN_KEY,
-        instrument_id FOREIGN_KEY,
-        timestamp: date,
-        timeframe TEXT,
-        close FLOAT,
-        open: FLOAT or NONE DEFAULTS: NONE,
-        high: FLOAT or NONE DEFAULTS: NONE,
-        low: FLOAT or NONE DEFAULTS: NONE,
-        adjusted_close FLOAT or NONE DEFAULTS: NONE,
-        volume: FLOAT or NONE DEFAULTS: NONE
-    )
+    create_price_bars_table = """
+        CREATE TABLE IF NOT EXISTS price_bars (
+        id INTEGER PRIMARY KEY DEFAULT keyval('data_sources_id_seq'),
+        source_id INTEGER NOT NULL,
+        instrument_id INTEGER NOT NULL,
+        timestamp DATE NOT NULL,
+        timeframe TEXT NOT NULL,
+        close DOUBLE NOT NULL,
+        open DOUBLE,
+        high DOUBLE,
+        low DOUBLE,
+        adjusted_close DOUBLE,
+        volume DOUBLE,
+        FOREIGN KEY (source_id) REFERENCES data_sources (id),
+        FOREIGN KEY (instrument_id) REFERENCES instruments (id)
+    );
     """
     duckdb.connect(database_path)
+    duckdb.execute(query=create_data_sources_sequence)
     duckdb.execute(query=create_datasources_table)
-    duckdb.execute(query=create_intstrument_table)
-    duckdb.execute(query=create_price_bar_table)
+    duckdb.execute(query=create_intstruments_table)
+    duckdb.execute(query=create_price_bars_table)
     duckdb.close()
