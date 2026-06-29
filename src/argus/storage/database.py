@@ -87,3 +87,17 @@ def insert_instruemnt(database_path, instrument: Instrument) -> None:
         parameters=[instrument.symbol, instrument.name, instrument.asset_class],
     )
     connection.close()
+
+
+def insert_pirce_bar(database_path, price_bar: PriceBar) -> None:
+    insert_query = """
+    INSERT INTO instruments (timestamp,timeframe,close)
+    VALUES (?,?,?);
+    """
+
+    connection = duckdb.connect(database_path)
+    connection.execute(
+        query=insert_query,
+        parameters=[price_bar.timestamp, price_bar.timeframe, price_bar.close],
+    )
+    connection.close()
