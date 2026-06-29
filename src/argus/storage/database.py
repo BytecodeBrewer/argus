@@ -7,7 +7,7 @@ def initialize_database(database_path: str) -> None:
     CREATE SEQUENCE IF NOT EXISTS data_sources_id_seq;
     """
     create_instruments_sequence = """
-    CREATE SEQUENCE IF NOT EXISTS instruemnts_id_seq;
+    CREATE SEQUENCE IF NOT EXISTS instruements_id_seq;
     """
     create_price_bars_sequence = """
     CREATE SEQUENCE IF NOT EXISTS price_bars_id_seq;
@@ -22,7 +22,7 @@ def initialize_database(database_path: str) -> None:
     """
     create_intstruments_table = """
         CREATE TABLE IF NOT EXISTS instruments (
-        id INTEGER PRIMARY KEY DEFAULT nextval('instruemnts_id_seq'),
+        id INTEGER PRIMARY KEY DEFAULT nextval('instruements_id_seq'),
         symbol TEXT NOT NULL UNIQUE,
         name TEXT NOT NULL,
         asset_class TEXT NOT NULL,
@@ -75,7 +75,7 @@ def insert_data_source(database_path, source: DataSource) -> None:
     connection.close()
 
 
-def insert_instruemnt(database_path, instrument: Instrument) -> None:
+def insert_instruement(database_path, instrument: Instrument) -> None:
     insert_query = """
     INSERT INTO instruments (symbol,name,asset_class)
     VALUES (?,?,?);
@@ -88,16 +88,42 @@ def insert_instruemnt(database_path, instrument: Instrument) -> None:
     )
     connection.close()
 
-
-def insert_pirce_bar(database_path, price_bar: PriceBar) -> None:
-    insert_query = """
-    INSERT INTO instruments (timestamp,timeframe,close)
-    VALUES (?,?,?);
+def find_data_source_id(database_path,price_bar: PriceBar):
+    search_query = """
+    SELECT id FROM data_sources
+    WHERE name=?
     """
+    connection = duckdb.connect(database_path)
+    result = connection.execute(
+        query=search_query,
+        parameters=[price_bar.source.name],
+    )
+    connection.close()
+    return result
 
+def find_instrument_id(database_path,price_bar: PriceBar):
+    search_query = """
+    SELECT id FROM instruments
+    WHERE name=?
+    """
+    connection = duckdb.connect(database_path)
+    connection.execute(
+        query=search_query,
+        parameters=[price_bar.instrument.name],
+    )
+    connection.close()
+
+def insert_price_bar(database_path, price_bar: PriceBar) -> None:
+    insert_query = """
+    INSERT INTO price_bars (source_id,instrument_id,timestamp,timeframe,close)
+    VALUES (?,?,?,?,?);
+    """
+    data_source_id = find_data_source_id(database_path, price_bar)
+    instrument_id = find_instrument_id(database_path, price_bar)
+    
     connection = duckdb.connect(database_path)
     connection.execute(
         query=insert_query,
-        parameters=[price_bar.timestamp, price_bar.timeframe, price_bar.close],
+        parameters=[data_source_id,instrument_id,price_bar.timestamp, price_bar.timeframe, price_bar.close],
     )
     connection.close()
