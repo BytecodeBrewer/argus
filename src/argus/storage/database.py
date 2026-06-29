@@ -1,4 +1,5 @@
 import duckdb
+import pandas as pd
 from argus.domain.internal_models import DataSource, PriceBar, Instrument
 
 
@@ -62,7 +63,7 @@ def initialize_database(database_path: str) -> None:
     connection.close()
 
 
-def insert_data_source(database_path, source: DataSource) -> None:
+def insert_data_source(database_path: str, source: DataSource) -> None:
     insert_query = """
     INSERT INTO data_sources (name, provider_kind, requires_api_key)
     VALUES (?,?,?);
@@ -75,10 +76,17 @@ def insert_data_source(database_path, source: DataSource) -> None:
     connection.close()
 
 
-def insert_instruement(database_path, instrument: Instrument) -> None:
+def insert_instrument(database_path: str, instrument: Instrument) -> None:
     insert_query = """
-    INSERT INTO instruments (symbol,name,asset_class)
-    VALUES (?,?,?);
+    INSERT INTO instruments (
+        symbol,
+        name,
+        asset_class,
+        currency,
+        exchange,
+        base_currency,
+        quote_currency)
+    VALUES (?,?,?,?,?,?,?);
     """
 
     connection = duckdb.connect(database_path)
@@ -88,7 +96,8 @@ def insert_instruement(database_path, instrument: Instrument) -> None:
     )
     connection.close()
 
-def find_data_source_id(database_path,price_bar: PriceBar):
+
+def get_data_source_id(database_path: str, source: DataSource) -> int | None:
     search_query = """
     SELECT id FROM data_sources
     WHERE name=?
@@ -96,34 +105,73 @@ def find_data_source_id(database_path,price_bar: PriceBar):
     connection = duckdb.connect(database_path)
     result = connection.execute(
         query=search_query,
-        parameters=[price_bar.source.name],
-    )
+        parameters=[source.name],
+    ).fetchone()
     connection.close()
-    return result
+    if result is None:
+        return None
+    return result[0]
 
-def find_instrument_id(database_path,price_bar: PriceBar):
+
+def get_instrument_id(database_path: str, instrument: Instrument) -> int | None:
     search_query = """
     SELECT id FROM instruments
     WHERE name=?
     """
     connection = duckdb.connect(database_path)
-    connection.execute(
+    result = connection.execute(
         query=search_query,
-        parameters=[price_bar.instrument.name],
-    )
+        parameters=[instrument.name],
+    ).fetchone()
     connection.close()
+    if result is None:
+        return None
+    return result[0]
 
-def insert_price_bar(database_path, price_bar: PriceBar) -> None:
+
+def insert_price_bar(database_path: str, price_bar: PriceBar) -> None:
     insert_query = """
-    INSERT INTO price_bars (source_id,instrument_id,timestamp,timeframe,close)
-    VALUES (?,?,?,?,?);
-    """
-    data_source_id = find_data_source_id(database_path, price_bar)
-    instrument_id = find_instrument_id(database_path, price_bar)
-    
+        INSERT INTO price_bars (
+            source_id,
+            instrument_id,
+            timestamp,
+            timeframe,
+            close,
+            open,
+            high,
+            low,
+            adjusted_close,
+            volume
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """
+    source_id = get_data_source_id(database_path, price_bar.source)
+    instrument_id = get_instrument_id(database_path, price_bar.instrument)
+
     connection = duckdb.connect(database_path)
+
+    if source_id is None:
+        connection.close()
+        raise ValueError("Data source does not exist in storage.")
+
+    if instrument_id is None:
+        connection.close()
+        raise ValueError("Instrument does not exist in storage.")
+
     connection.execute(
         query=insert_query,
-        parameters=[data_source_id,instrument_id,price_bar.timestamp, price_bar.timeframe, price_bar.close],
+        parameters=[
+            source_id,
+            instrument_id,
+            price_bar.timestamp,
+            price_bar.timeframe,
+            price_bar.close,
+            price_bar.open,
+            price_bar.high,
+            price_bar.low,
+            price_bar.adjusted_close,
+            price_bar.volume,
+        ],
     )
+
     connection.close()
