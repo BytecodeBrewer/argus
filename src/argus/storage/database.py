@@ -1,4 +1,5 @@
 import duckdb
+from argus.domain.internal_models import DataSource, PriceBar, Instrument
 
 
 def initialize_database(database_path: str) -> None:
@@ -57,27 +58,32 @@ def initialize_database(database_path: str) -> None:
     connection.execute(query=create_datasources_table)
     connection.execute(query=create_intstruments_table)
     connection.execute(query=create_price_bars_table)
-    
+
     connection.close()
 
-def insert_data_source(database_path, source):
-    connection = duckdb.connect(database_path)
 
-    source = """
+def insert_data_source(database_path, source: DataSource) -> None:
+    insert_query = """
     INSERT INTO data_sources (name, provider_kind, requires_api_key)
     VALUES (?,?,?);
     """
-    
-    connection.execute(query=source)
+    connection = duckdb.connect(database_path)
+    connection.execute(
+        query=insert_query,
+        parameters=[source.name, source.provider_kind, source.requires_api_key],
+    )
     connection.close()
 
-def insert_instruemnt(database_path, source):
-    connection = duckdb.connect(database_path)
 
-    source = """
+def insert_instruemnt(database_path, instrument: Instrument) -> None:
+    insert_query = """
     INSERT INTO instruments (symbol,name,asset_class)
     VALUES (?,?,?);
     """
-    
-    connection.execute(query=source)
+
+    connection = duckdb.connect(database_path)
+    connection.execute(
+        query=insert_query,
+        parameters=[instrument.symbol, instrument.name, instrument.asset_class],
+    )
     connection.close()
