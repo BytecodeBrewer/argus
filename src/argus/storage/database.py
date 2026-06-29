@@ -1,5 +1,4 @@
 import duckdb
-import pandas as pd
 from argus.domain.internal_models import DataSource, PriceBar, Instrument
 
 
@@ -8,12 +7,12 @@ def initialize_database(database_path: str) -> None:
     CREATE SEQUENCE IF NOT EXISTS data_sources_id_seq;
     """
     create_instruments_sequence = """
-    CREATE SEQUENCE IF NOT EXISTS instruements_id_seq;
+    CREATE SEQUENCE IF NOT EXISTS instruments_id_seq;
     """
     create_price_bars_sequence = """
     CREATE SEQUENCE IF NOT EXISTS price_bars_id_seq;
     """
-    create_datasources_table = """ 
+    create_data_sources_table = """ 
     CREATE TABLE IF NOT EXISTS data_sources (
         id INTEGER PRIMARY KEY DEFAULT nextval('data_sources_id_seq'),
         name TEXT NOT NULL UNIQUE,
@@ -21,9 +20,9 @@ def initialize_database(database_path: str) -> None:
         requires_api_key BOOLEAN NOT NULL
     );
     """
-    create_intstruments_table = """
+    create_instruments_table = """
         CREATE TABLE IF NOT EXISTS instruments (
-        id INTEGER PRIMARY KEY DEFAULT nextval('instruements_id_seq'),
+        id INTEGER PRIMARY KEY DEFAULT nextval('instruments_id_seq'),
         symbol TEXT NOT NULL UNIQUE,
         name TEXT NOT NULL,
         asset_class TEXT NOT NULL,
@@ -56,8 +55,8 @@ def initialize_database(database_path: str) -> None:
     connection.execute(query=create_instruments_sequence)
     connection.execute(query=create_price_bars_sequence)
 
-    connection.execute(query=create_datasources_table)
-    connection.execute(query=create_intstruments_table)
+    connection.execute(query=create_data_sources_table)
+    connection.execute(query=create_instruments_table)
     connection.execute(query=create_price_bars_table)
 
     connection.close()
@@ -134,15 +133,7 @@ def get_or_create_instrument(connection, instrument: Instrument) -> int:
     )
     result = connection.execute(
         query=search_query,
-        parameters=[
-            instrument.symbol,
-            instrument.name,
-            instrument.asset_class,
-            instrument.currency,
-            instrument.exchange,
-            instrument.base_currency,
-            instrument.quote_currency,
-        ],
+        parameters=[instrument.symbol],
     ).fetchone()
 
     if result is None:
@@ -168,22 +159,24 @@ def insert_price_bar(db: str, price_bar: PriceBar) -> None:
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
     connection = duckdb.connect(db)
-    source_id = get_or_create_source(connection, price_bar.source)
-    instrument_id = get_or_create_instrument(connection, price_bar.instrument)
-    connection.execute(
-        query=insert_query,
-        parameters=[
-            source_id,
-            instrument_id,
-            price_bar.timestamp,
-            price_bar.timeframe,
-            price_bar.close,
-            price_bar.open,
-            price_bar.high,
-            price_bar.low,
-            price_bar.adjusted_close,
-            price_bar.volume,
-        ],
-    )
-
-    connection.close()
+    try:
+        source_id = get_or_create_source(connection, price_bar.source)
+        instrument_id = get_or_create_instrument(connection, price_bar.instrument)
+        connection.execute(
+            query=insert_query,
+            parameters=[
+                source_id,
+                instrument_id,
+                price_bar.timestamp,
+                price_bar.timeframe,
+                price_bar.close,
+                price_bar.open,
+                price_bar.high,
+                price_bar.low,
+                price_bar.adjusted_close,
+                price_bar.volume,
+            ],
+        )
+        connection.close()
+    finally:
+        connection.close()
