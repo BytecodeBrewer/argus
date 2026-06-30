@@ -1,4 +1,6 @@
 import duckdb
+from datetime import date
+import pandas as pd
 from argus.domain.internal_models import DataSource, PriceBar, Instrument
 
 
@@ -181,25 +183,49 @@ def insert_price_bar(db: str, price_bar: PriceBar) -> None:
     finally:
         connection.close()
 
-def get_price_bar(db: str,source:DataSource,instrument:Instrument,start_time:str,end_time:str):
+
+def read_price_bars(
+    db: str,
+    source: DataSource,
+    instrument: Instrument,
+    start_date: date,
+    end_date: date,
+) -> pd.DataFrame:
     search_query = """
-        SELECT
-            data_sources.name AS source_name,
-            instruments.symbol AS instrument_symbol,
-            price_bars.timestamp,
-            price_bars.timeframe,
-            price_bars.open,
-            price_bars.high,
-            price_bars.low,
-            price_bars.close,
-            price_bars.adjusted_close,
-            price_bars.volume
-        FROM price_bars
-        WHERE data_sources.name = ? AND instruments.symbol = ? AND price_bars.timestamp BETWEEN ? AND ?
-        JOIN data_sources ON price_bars.source_id = data_sources.id
-        JOIN instruments ON price_bars.instrument_id = instruments.id
-        """
+    SELECT
+        data_sources.name AS source_name,
+        instruments.symbol AS instrument_symbol,
+        price_bars.timestamp,
+        price_bars.timeframe,
+        price_bars.open,
+        price_bars.high,
+        price_bars.low,
+        price_bars.close,
+        price_bars.adjusted_close,
+        price_bars.volume
+    FROM price_bars
+    JOIN data_sources ON price_bars.source_id = data_sources.id
+    JOIN instruments ON price_bars.instrument_id = instruments.id
+    WHERE data_sources.name = ?
+      AND instruments.symbol = ?
+      AND price_bars.timestamp BETWEEN ? AND ?
+    ORDER BY price_bars.timestamp;
+    """
+
     connection = duckdb.connect(db)
-    result = connection.execute(search_query,parameters=[source.name,instrument.symbol,start_time,end_time])
+    try:
+        result = connection.execute(
+            query=search_query,
+            parameters=[
+                source.name,
+                instrument.symbol,
+                start_date,
+                end_date,
+            ],
+        ).df()
+    finally:
+        connection.close()
+
     connection.close()
+
     return result
