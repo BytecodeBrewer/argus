@@ -180,3 +180,26 @@ def insert_price_bar(db: str, price_bar: PriceBar) -> None:
         connection.close()
     finally:
         connection.close()
+
+def get_price_bar(db: str,source:DataSource,instrument:Instrument,start_time:str,end_time:str):
+    search_query = """
+        SELECT
+            data_sources.name AS source_name,
+            instruments.symbol AS instrument_symbol,
+            price_bars.timestamp,
+            price_bars.timeframe,
+            price_bars.open,
+            price_bars.high,
+            price_bars.low,
+            price_bars.close,
+            price_bars.adjusted_close,
+            price_bars.volume
+        FROM price_bars
+        WHERE data_sources.name = ? AND instruments.symbol = ? AND price_bars.timestamp BETWEEN ? AND ?
+        JOIN data_sources ON price_bars.source_id = data_sources.id
+        JOIN instruments ON price_bars.instrument_id = instruments.id
+        """
+    connection = duckdb.connect(db)
+    result = connection.execute(search_query,parameters=[source.name,instrument.symbol,start_time,end_time])
+    connection.close()
+    return result
