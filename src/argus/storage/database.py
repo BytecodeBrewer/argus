@@ -60,7 +60,8 @@ def initialize_database(database_path: str) -> None:
 def get_or_create_source(connection, source: DataSource) -> int:
     insert_query = """
     INSERT INTO data_sources (name, provider_kind, requires_api_key)
-    VALUES (?,?,?);
+    VALUES (?,?,?)
+    ON CONFLICT DO NOTHING;
     """
     search_query = """
     SELECT id FROM data_sources
@@ -100,7 +101,8 @@ def get_or_create_instrument(connection, instrument: Instrument) -> int:
         exchange,
         base_currency,
         quote_currency)
-    VALUES (?,?,?,?,?,?,?);
+    VALUES (?,?,?,?,?,?,?)
+    ON CONFLICT DO NOTHING;
     """
     search_query = """
     SELECT id FROM instruments
@@ -151,7 +153,8 @@ def insert_price_bar(db: str, price_bar: PriceBar) -> None:
             adjusted_close,
             volume
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT DO NOTHING;
         """
     connection = duckdb.connect(db)
     try:
