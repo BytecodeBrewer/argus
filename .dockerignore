@@ -1,0 +1,25 @@
+# Git
+.git
+.github
+.githooks
+.gitignore
+
+# Local environment and secrets
+.venv
+.env
+
+# Python cache and test cache
+__pycache__
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+htmlcov
+
+# Build artifacts
+dist
+build
+*.egg-info
+
+# Project docs not needed for the test image
+docs

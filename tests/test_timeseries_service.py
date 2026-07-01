@@ -23,8 +23,9 @@ def test_get_a_full_timeseries():
         "max_rate": [1.1055831909179688],
     }
     result = prepare_trend_analysis(test_curr, test_start, test_end, test_interval)
-    if result is None:
-        return False
+
+    assert result is not None
+
     result_df, result_dict = result
     result_df["date"] = result_df["date"].astype("str")
     result_dict["min_date"] = [str(result_dict["min_date"][0])]

@@ -4,33 +4,9 @@ Thank you for your interest in contributing to ARGUS.
 
 ARGUS is a Python-based market analytics project focused on clean data workflows, reliable code, useful metrics and future AI-assisted monitoring.
 
-This project is still growing, so contributions should help the project become more stable, understandable and useful step by step.
+The project is still growing, so contributions should be small, focused and easy to review. You do not need to be an expert to contribute, but your changes should be understandable, reliable and related to the current project direction.
 
-> [!IMPORTANT]
-> ARGUS values reliability, clear communication and long-term skill building.  
-> Contributions should improve the project without creating unnecessary complexity.
-
----
-
-## Project Mindset
-
-ARGUS is not only about adding features quickly.
-
-The project is built around:
-
-- clean Python code
-- understandable architecture
-- reliable tests
-- useful documentation
-- careful data handling
-- practical analytics
-- continuous learning
-
-Good contributions should make the project easier to use, test, maintain or extend.
-
----
-
-## What You Can Contribute
+Good starting points are issues labeled `good first issue`. These issues are usually smaller, easier to review and better suited for getting familiar with the project.
 
 Helpful contributions include:
 
@@ -38,17 +14,14 @@ Helpful contributions include:
 - tests
 - documentation improvements
 - small refactorings
-- validation improvements
 - analytics metrics
-- chart improvements
 - data-source clients
-- CI/CD improvements
-- issue clarification
-- architecture notes
-- examples and usage instructions
+- UI or chart improvements
+- CI/CD and tooling improvements
+- architecture or research notes
 
-> [!NOTE]
-> Large features should usually start with an issue or short discussion before implementation.
+> [!IMPORTANT]
+> Please keep changes focused and avoid adding unnecessary complexity.
 
 ---
 
@@ -76,46 +49,45 @@ Bad examples:
 
 ---
 
-## Development Setup
+## Contribution Expectations
 
-Clone the repository:
+Contributors are expected to keep changes focused, understandable and related to the issue or task.
 
-```bash
-git clone https://github.com/BytecodeBrewer/argus.git
-cd argus
-```
+Please:
 
-Create a virtual environment:
+- explain your changes clearly
+- be open to review feedback
+- improve your contribution step by step after feedback
+- avoid unrelated rewrites
+- respect the existing architecture unless there is a clear reason to change it
+- do not add scripts that automatically run `git add`, `git commit`, `git push` or create pull requests unless this was discussed first
 
-```bash
-python -m venv .venv
-```
+A contribution may be declined or delayed if it:
 
-Activate it.
-
-On Windows PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-On macOS/Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-Install the project with development dependencies:
-
-```bash
-pip install -e ".[dev]"
-```
+- does not fit the current roadmap
+- adds too much complexity too early
+- breaks existing functionality
+- lacks necessary checks or documentation
+- duplicates existing work
+- bypasses the repository workflow
 
 ---
 
 ## Branch Workflow
 
-Create a new branch for your work:
+For issue-based work, create your branch from the related GitHub issue when possible.
+
+GitHub may suggest a branch name based on the issue title. You can shorten it if the generated name is too long.
+
+Good branch names are focused and describe the task:
+
+```text
+43-research-forecasting-approach
+33-add-yfinance-client
+40-improve-test-coverage
+```
+
+If you create the branch manually, use:
 
 ```bash
 git checkout -b <issue-number-short-description>
@@ -124,10 +96,8 @@ git checkout -b <issue-number-short-description>
 Example:
 
 ```bash
-git checkout -b 12-add-volatility-metric
+git checkout -b 43-research-forecasting-approach
 ```
-
-Use focused branch names that describe the work.
 
 ---
 
@@ -135,13 +105,21 @@ Use focused branch names that describe the work.
 
 Commits should be small, understandable and related to the current task.
 
+ARGUS uses a conventional commit style with an issue reference:
+
+```text
+type(#issue): short description
+```
+
 Good commit messages:
 
 ```text
-Add rolling volatility metric
-Fix currency validation edge case
-Update README setup instructions
-Add tests for trend metrics
+docs(#43): research first forecasting approach
+feat(#33): add yfinance historical data client
+test(#40): add tests for conversion service
+fix(#33): handle empty historical data response
+refactor(#34): split metric helpers
+ci(#10): update commit message workflow
 ```
 
 Avoid unclear messages:
@@ -155,21 +133,25 @@ final
 ```
 
 > [!TIP]
-> A good commit tells future readers what changed and why it belongs to the task.
+> A good commit tells future readers what changed and which issue it belongs to.
 
 ---
 
-## Testing
+## Checks
 
-Before opening a pull request, run the test suite:
+Before opening a pull request, run the project checks:
 
 ```bash
 pytest
+ruff check .
+ruff format --check .
 ```
 
-A pull request should not be opened as ready for review if tests are failing without explanation.
+These checks verify that tests pass, code style is valid and formatting is consistent.
 
-If a test fails and you do not know why, mention it clearly in the pull request.
+A pull request should not be marked as ready for review if checks are failing without explanation.
+
+If a check fails and you are unsure why, mention it clearly in the pull request.
 
 > [!IMPORTANT]
 > CI checks must pass before a pull request can be merged.
@@ -178,65 +160,23 @@ If a test fails and you do not know why, mention it clearly in the pull request.
 
 ## Pull Request Expectations
 
-A good pull request should include:
+Pull requests should target `develop` unless the maintainer explicitly says otherwise.
 
-- a clear title
-- a short explanation of what changed
-- a link to the related issue if available
-- notes about tests
-- screenshots for UI changes if useful
-- a short explanation of any trade-offs
+Do not open feature, research or documentation pull requests directly against `main`.
+The `main` branch is reserved for stable/release-ready changes.
 
-Pull requests should be focused and reviewable.
+Please use the pull request template and fill it out clearly.
 
-Before opening a pull request, run:
+The template helps reviewers understand:
 
-```bash
-pytest
-ruff check .
-ruff format --check .
-```
+- what changed
+- which issue is related
+- whether tests were run
+- whether documentation or screenshots are needed
+- if there are any notes or trade-offs
 
----
-
-## Reliability Expectations
-
-Contributors are expected to work reliably.
-
-This means:
-
-- do not submit random or unfinished code without context
-- do not ignore failing tests
-- do not introduce secrets, API keys or local machine paths
-- do not rewrite unrelated parts of the project without discussion
-- communicate if you are unsure
-- keep changes understandable for future contributors
-- respect the existing architecture unless there is a clear reason to change it
-
-Reliability does not mean knowing everything already.
-
-It means being honest, careful and consistent.
-
----
-
-## Learning Mindset
-
-ARGUS welcomes contributors who want to improve their technical skills.
-
-You do not need to be an expert to contribute.
-
-Helpful behavior includes:
-
-- asking clear questions
-- explaining your reasoning
-- being open to review feedback
-- improving your code after feedback
-- learning from tests, errors and architecture discussions
-- documenting what you learned when it helps others
-
-> [!NOTE]
-> This project values skill growth.  
-> A thoughtful small contribution is better than a large unclear one.
+Do not bypass the pull request template or replace it with an unrelated auto-generated description.  
+It makes reviewing harder and may delay the merge.
 
 ---
 
@@ -265,24 +205,13 @@ For analytics code:
 
 ## Secrets and API Keys
 
-Never commit secrets.
+Never commit secrets, API keys, tokens, passwords, `.env` files or local config files with private data.
 
-Do not commit:
-
-- API keys
-- tokens
-- passwords
-- `.env` files
-- local config files with private data
-
-Use a local `.env` file for secrets.
+Use a local `.env` file for secrets:
 
 ```env
-api_key=your_api_key_here
+EXCHANGE_RATE_API_KEY=your_api_key_here
 ```
-
-> [!WARNING]
-> If you accidentally commit a secret, revoke it immediately and inform the maintainer.
 
 ---
 
@@ -299,44 +228,4 @@ Useful documentation includes:
 - data-source assumptions
 - troubleshooting notes
 
-Repository-level files such as `README.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` and `LICENSE` belong in the repository root.
-
 Technical notes, research and deeper explanations belong in `docs/`.
-
----
-
-## Communication
-
-Please communicate respectfully and constructively.
-
-When giving feedback:
-
-- focus on the code or idea, not the person
-- explain the reason behind suggestions
-- be specific
-- stay open to alternatives
-
-When receiving feedback:
-
-- assume good intent
-- ask questions if something is unclear
-- improve the contribution step by step
-
-All contributors are expected to follow the project’s Code of Conduct.
-
----
-
-## Maintainer Notes
-
-The maintainer may ask for changes before merging a pull request.
-
-A contribution may be declined if it:
-
-- does not fit the current roadmap
-- adds too much complexity too early
-- breaks existing functionality
-- lacks necessary tests
-- duplicates existing work
-- does not follow the project’s quality expectations
-
-This helps keep ARGUS stable, learnable and maintainable.

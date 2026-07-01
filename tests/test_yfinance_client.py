@@ -72,7 +72,7 @@ def test_error_raise(monkeypatch):
     def fake_yfinance_download(
         tickers=test_curr, start=test_start, end=test_end, interval=test_interval
     ):
-        return Exception("fake yfinance error")
+        raise Exception("fake yfinance error")
 
     monkeypatch.setattr("yfinance.download", fake_yfinance_download)
 

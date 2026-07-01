@@ -7,9 +7,13 @@ from argus.domain.validation import (
 
 
 def test_op_is_valid():
-    data = is_valid_op("+")
 
-    assert data is True
+    assert is_valid_op("+") is True
+    assert is_valid_op("-") is True
+    assert is_valid_op("*") is True
+    assert is_valid_op("/") is True
+    assert is_valid_op("%") is True
+    assert is_valid_op("**") is True
 
 
 def test_op_is_not_valid():
