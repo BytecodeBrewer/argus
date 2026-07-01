@@ -65,7 +65,6 @@ def test_check_currency_key_error(monkeypatch, capsys):
     test_resp.json.return_value = {
         "result": "success",  # not passing "success" bypases the "conversion_rate" checking
         "error_type": "",
-        # "conversion_rate" fehlt absichtlich
     }
 
     def test_get_resp(url, timeout):

@@ -125,6 +125,13 @@ README.md
 - ExchangeRate API for live currency conversion
 - yfinance for historical market-data retrieval and analytics
 
+### Storage
+
+- DuckDB — local analytical storage for normalized historical market data
+
+>[!Note]
+> See docs/storage.md for details.
+
 ---
 
 ## Planned / Future Tech Stack
@@ -138,40 +145,32 @@ Planned or likely future technologies include:
 - Frankfurter API for historical FX data
 - possible additional market-data APIs later
 
-### Data processing
-
-- possibly Polars later for larger datasets
-
 ### Storage
 
 - PostgreSQL
-- DuckDB
-- Parquet
-- optional cloud storage
 
 ### Visualization and UI
 
 - NiceGUI
+- Django
 
 ### DevOps and deployment
 
 - Docker Compose
-- cloud deployment later
+- Travis CI
 
 ### Cloud and data engineering
 
-- Azure, GCP or AWS depending on project direction
+- Azure
 - scheduled ingestion
-- data quality checks
-- reporting pipelines
+- agentic Workflows
+- Blob Storage
+- scaled analysis
 
 ### AI and agentic workflows
 
 - LLM-assisted summaries
 - RAG over stored reports or notes
-- agentic data checks
-- anomaly monitoring
-- human-in-the-loop signal review
 
 > [!CAUTION]
 > AI and agentic features are future-stage ideas.  
