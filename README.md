@@ -120,17 +120,10 @@ README.md
 - Tkinter
 - pytest
 
-### Current data sources
+### Current data source
 
 - ExchangeRate API for live currency conversion
 - yfinance for historical market-data retrieval and analytics
-
-### Storage
-
-- DuckDB — local analytical storage for normalized historical market data
-
->[!Note]
-> See docs/storage.md for details.
 
 ---
 
@@ -145,32 +138,46 @@ Planned or likely future technologies include:
 - Frankfurter API for historical FX data
 - possible additional market-data APIs later
 
+### Data processing
+
+- pandas
+- NumPy
+- possibly Polars later for larger datasets
+
 ### Storage
 
 - PostgreSQL
+- DuckDB
+- Parquet
+- optional cloud storage
 
 ### Visualization and UI
 
+- matplotlib
+- Plotly
 - NiceGUI
-- Django
 
 ### DevOps and deployment
 
+- GitHub Actions
+- Docker
 - Docker Compose
-- Travis CI
+- cloud deployment later
 
 ### Cloud and data engineering
 
-- Azure
+- Azure, GCP or AWS depending on project direction
 - scheduled ingestion
-- agentic Workflows
-- Blob Storage
-- scaled analysis
+- data quality checks
+- reporting pipelines
 
 ### AI and agentic workflows
 
 - LLM-assisted summaries
 - RAG over stored reports or notes
+- agentic data checks
+- anomaly monitoring
+- human-in-the-loop signal review
 
 > [!CAUTION]
 > AI and agentic features are future-stage ideas.  
@@ -192,7 +199,6 @@ Recommended for development:
 - VS Code
 - a virtual environment
 - pytest
-- Docker, if you want to run tests in an isolated container environment
 
 > [!NOTE]
 > Runtime dependencies are managed through `pyproject.toml`.
@@ -248,7 +254,7 @@ pip install -e ".[dev]"
 
 ## API Key Setup
 
-ARGUS uses the ExchangeRate API for live currency conversion. Historical analytics currently use yfinance and do not require an additional API key.
+ARGUS currently uses the ExchangeRate API for live currency conversion.
 
 ### 1. Create an API key
 
@@ -278,7 +284,7 @@ The `.env` file must stay local and should never be committed.
 
 ---
 
-## Running ARGUS Locally
+## Running ARGUS
 
 Start the current Tkinter GUI:
 
@@ -287,22 +293,6 @@ python -m argus.main
 ```
 
 This starts the local ARGUS prototype with calculator, currency conversion and basic analytics views.
-
-## Running Argus in Docker
-
-ARGUS includes a minimal Docker setup for running the test suite in an isolated container environment.
-
-Build the Docker image:
-
-```bash
-docker build -t argus .
-```
-
-Run ARGUS in a container:
-
-```bash
-docker run --rm argus
-```
 
 ### Legacy CLI / Debug Interface
 
@@ -320,7 +310,7 @@ python src/legacy/debug_main.py
 
 ## Running Tests
 
-Run the test suite locally:
+Run the test suite:
 
 ```bash
 pytest
