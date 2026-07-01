@@ -9,7 +9,6 @@ dependencies = [
     "numpy",
     "matplotlib",
     "yfinance",
-    "duckdb",
 ]
 
 [project.optional-dependencies]
