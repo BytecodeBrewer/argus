@@ -5,6 +5,18 @@ from argus.domain.internal_models import DataSource, PriceBar, Instrument
 
 
 def initialize_database(database_path: str) -> None:
+    """
+    Initialize the DuckDB database schema.
+
+    Creates the required sequences and tables for data sources,
+    instruments, and price bars.
+
+    Args:
+        database_path (str): Path to the DuckDB database file.
+
+    Returns:
+        None
+    """
     queries = [
         "CREATE SEQUENCE IF NOT EXISTS data_sources_id_seq;",
         "CREATE SEQUENCE IF NOT EXISTS instruments_id_seq;",
@@ -58,6 +70,23 @@ def initialize_database(database_path: str) -> None:
 
 
 def get_or_create_source(connection, source: DataSource) -> int:
+    """
+    Get an existing data source ID or create a new data source.
+
+    Searches for a data source by name. If it already exists, its ID is
+    returned. Otherwise, the data source is inserted and the new ID is
+    returned.
+
+    Args:
+        connection: Active DuckDB connection.
+        source (DataSource): Data source model containing provider metadata.
+
+    Returns:
+        int: Database ID of the existing or newly created data source.
+
+    Raises:
+        ValueError: If the data source could not be inserted or found.
+    """
     insert_query = """
     INSERT INTO data_sources (name, provider_kind, requires_api_key)
     VALUES (?,?,?)
@@ -92,6 +121,24 @@ def get_or_create_source(connection, source: DataSource) -> int:
 
 
 def get_or_create_instrument(connection, instrument: Instrument) -> int:
+    """
+    Get an existing instrument ID or create a new instrument.
+
+    Searches for an instrument by symbol. If it already exists, its ID is
+    returned. Otherwise, the instrument is inserted and the new ID is
+    returned.
+
+    Args:
+        connection: Active DuckDB connection.
+        instrument (Instrument): Instrument model containing symbol and
+            asset metadata.
+
+    Returns:
+        int: Database ID of the existing or newly created instrument.
+
+    Raises:
+        ValueError: If the instrument could not be inserted or found.
+    """
     insert_query = """
     INSERT INTO instruments (
         symbol,
