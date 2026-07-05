@@ -1,8 +1,16 @@
 import yfinance as yf
 import logging
+from datetime import date
+from argus.domain.internal_models import DataSource, Instrument, PriceBar
 
 
-def get_timeseries(curr_symbol, start, end, interval):
+def get_timeseries(
+    source: DataSource,
+    instrument: Instrument,
+    bar: PriceBar,
+    start_date: date,
+    end_date: date,
+):
     """
     Fetch historical exchange-rate time series data from Yahoo Finance.
 
@@ -23,10 +31,10 @@ def get_timeseries(curr_symbol, start, end, interval):
         yf_logger = logging.getLogger("yfinance")
         yf_logger.disabled = True
         data = yf.download(
-            tickers=curr_symbol,
-            start=start,
-            end=end,
-            interval=interval,
+            tickers=instrument.base_currency,
+            start=start_date,
+            end=end_date,
+            interval=bar.timeframe,
             multi_level_index=False,
             progress=False,
         )

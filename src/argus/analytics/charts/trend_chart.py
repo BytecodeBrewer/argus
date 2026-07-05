@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def create_trendchart(df:pd.DataFrame,min_max_rates:dict):
+def create_trendchart(df: pd.DataFrame, min_max_rates: dict):
     """
     Create a trend chart for exchange-rate analysis.
 

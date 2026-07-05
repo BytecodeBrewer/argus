@@ -1,5 +1,8 @@
 import pandas as pd
+from datetime import date
+from argus.domain.internal_models import DataSource, PriceBar, Instrument
 from argus.clients.yfinance_client import get_timeseries
+from argus.storage.database import read_price_bars
 from argus.analytics.metrics.trend_metrics import (
     add_rolling_average,
     add_daily_percentage_change,
@@ -31,12 +34,17 @@ def prepare_trend_analysis(df: pd.DataFrame):
     min_max_rates = get_min_max_rates(df)
     if df is None:
         return None
-    fig = create_trendchart(df,min_max_rates)
+    fig = create_trendchart(df, min_max_rates)
     return fig
 
 
 def get_market_data(
-    curr_symbol: str, start: str, end: str, intervall: str
+    db: str,
+    source: DataSource,
+    instrument: Instrument,
+    bar: PriceBar,
+    start_date: date,
+    end_date: date,
 ) -> pd.DataFrame | None:
     """
     Get a time series either from local stroage or client with first-storage-workflow
@@ -54,7 +62,23 @@ def get_market_data(
         DataFrame with dates and rates. Returns
         ``None`` if no time-series data could be fetched.
     """
-    df = get_timeseries(curr_symbol, start, end, intervall)
+    df, isNotEmpty = read_price_bars(
+        db=db,
+        source=source,
+        instrument=instrument,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    if isNotEmpty:
+        return df
+    else:
+        df = get_timeseries(
+            source=source,
+            instrument=instrument,
+            bar=bar,
+            start_date=start_date,
+            end_date=end_date,
+        )
     if df is None:
         return None
     return df
