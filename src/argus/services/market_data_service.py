@@ -5,9 +5,10 @@ from argus.analytics.metrics.trend_metrics import (
     add_daily_percentage_change,
     get_min_max_rates,
 )
+from argus.analytics.charts.trend_chart import create_trendchart
 
 
-def prepare_trend_analysis(df: pd.DataFrame) -> tuple[pd.DataFrame,dict] | None:
+def prepare_trend_analysis(df: pd.DataFrame):
     """
     Prepare time-series data for trend analysis.
 
@@ -25,15 +26,18 @@ def prepare_trend_analysis(df: pd.DataFrame) -> tuple[pd.DataFrame,dict] | None:
         ``None`` if no time-series data could be fetched.
     """
 
-    
     df = add_daily_percentage_change(df)
     df = add_rolling_average(df)
     min_max_rates = get_min_max_rates(df)
     if df is None:
         return None
-    return df, min_max_rates
+    fig = create_trendchart(df,min_max_rates)
+    return fig
 
-def get_market_data(curr_symbol: str, start: str, end: str, intervall: str) -> pd.DataFrame | None:
+
+def get_market_data(
+    curr_symbol: str, start: str, end: str, intervall: str
+) -> pd.DataFrame | None:
     """
     Get a time series either from local stroage or client with first-storage-workflow
 
@@ -54,5 +58,3 @@ def get_market_data(curr_symbol: str, start: str, end: str, intervall: str) -> p
     if df is None:
         return None
     return df
-
-    
