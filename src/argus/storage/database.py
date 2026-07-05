@@ -187,6 +187,21 @@ def get_or_create_instrument(connection, instrument: Instrument) -> int:
 
 
 def insert_price_bar(db: str, price_bar: PriceBar) -> None:
+    """
+    Insert a price bar into the database.
+
+    Ensures that the related data source and instrument exist, then inserts
+    the price bar into the ``price_bars`` table. Duplicate price bars are
+    ignored through the table's unique constraint.
+
+    Args:
+        db (str): Path to the DuckDB database file.
+        price_bar (PriceBar): Price bar model containing source,
+            instrument, timestamp, timeframe, and market values.
+
+    Returns:
+        None
+    """
     insert_query = """
         INSERT INTO price_bars (
             source_id,
@@ -233,6 +248,23 @@ def read_price_bars(
     start_date: date,
     end_date: date,
 ) -> pd.DataFrame:
+    """
+    Read price bars for a source, instrument, and date range.
+
+    Queries stored price bars joined with their data source and instrument
+    metadata. Results are ordered by timestamp and returned as a pandas
+    DataFrame.
+
+    Args:
+        db (str): Path to the DuckDB database file.
+        source (DataSource): Data source used to filter the stored price bars.
+        instrument (Instrument): Instrument used to filter the stored price bars.
+        start_date (date): Inclusive start date of the requested time range.
+        end_date (date): Inclusive end date of the requested time range.
+
+    Returns:
+        pd.DataFrame: DataFrame containing matching price bars and metadata.
+    """
 
     search_query = """
     SELECT

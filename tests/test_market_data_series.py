@@ -1,7 +1,7 @@
 import pandas as pd
 import pandas.testing as pdt
 import numpy as np
-from argus.services.timeseries_service import prepare_trend_analysis
+from argus.services.market_data_service import prepare_trend_analysis
 
 
 def test_get_a_full_timeseries():
