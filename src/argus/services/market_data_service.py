@@ -7,9 +7,7 @@ from argus.analytics.metrics.trend_metrics import (
 )
 
 
-def prepare_trend_analysis(
-    curr_symbol: str, start: str, end: str, intervall: str
-) -> tuple[pd.DataFrame, dict] | None:
+def prepare_trend_analysis(df: pd.DataFrame) -> tuple[pd.DataFrame,dict] | None:
     """
     Prepare time-series data for trend analysis.
 
@@ -17,6 +15,27 @@ def prepare_trend_analysis(
     enriches it with daily percentage changes and a rolling average. It also
     calculates the minimum and maximum exchange rates for the resulting time
     series.
+
+    Args:
+        df (pd.Dataframe): A timeserie with market data
+
+    Returns:
+        tuple[pd.DataFrame, dict] | None: A tuple containing the prepared
+        DataFrame and a dictionary with minimum and maximum rates. Returns
+        ``None`` if no time-series data could be fetched.
+    """
+
+    
+    df = add_daily_percentage_change(df)
+    df = add_rolling_average(df)
+    min_max_rates = get_min_max_rates(df)
+    if df is None:
+        return None
+    return df, min_max_rates
+
+def get_market_data(curr_symbol: str, start: str, end: str, intervall: str) -> pd.DataFrame | None:
+    """
+    Get a time series either from local stroage or client with first-storage-workflow
 
     Args:
         curr_symbol (str): Currency symbol used by Yahoo Finance, for example
@@ -27,15 +46,13 @@ def prepare_trend_analysis(
             "1d", "1h", or "15m".
 
     Returns:
-        tuple[pd.DataFrame, dict] | None: A tuple containing the prepared
-        DataFrame and a dictionary with minimum and maximum rates. Returns
+        pd.DataFrame | None: A
+        DataFrame with dates and rates. Returns
         ``None`` if no time-series data could be fetched.
     """
-
     df = get_timeseries(curr_symbol, start, end, intervall)
     if df is None:
         return None
-    df = add_daily_percentage_change(df)
-    df = add_rolling_average(df)
-    min_max_rates = get_min_max_rates(df)
-    return df, min_max_rates
+    return df
+
+    

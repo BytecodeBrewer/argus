@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from argus.services.timeseries_service import prepare_trend_analysis
+from argus.services.market_data_service import prepare_trend_analysis
 
 
 def create_trendchart(curr_symbol: str, start: str, end: str, interval: str):
