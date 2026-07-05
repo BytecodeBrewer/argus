@@ -247,7 +247,7 @@ def read_price_bars(
     instrument: Instrument,
     start_date: date,
     end_date: date,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, bool]:
     """
     Read price bars for a source, instrument, and date range.
 
@@ -298,6 +298,7 @@ def read_price_bars(
                 end_date,
             ],
         ).df()
+        isNotEmpty = not result.empty
     finally:
         connection.close()
-    return result
+    return result, isNotEmpty
