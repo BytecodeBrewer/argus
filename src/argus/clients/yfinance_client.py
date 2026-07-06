@@ -1,16 +1,10 @@
 import yfinance as yf
 import logging
 from datetime import date
-from argus.domain.internal_models import DataSource, Instrument, PriceBar
+from argus.domain.internal_models import MarketDataSet
+import pandas as pd
 
-
-def get_timeseries(
-    source: DataSource,
-    instrument: Instrument,
-    bar: PriceBar,
-    start_date: date,
-    end_date: date,
-):
+def get_timeseries(market_data:MarketDataSet) -> MarketDataSet | None:
     """
     Fetch historical exchange-rate time series data from Yahoo Finance.
 
@@ -30,11 +24,15 @@ def get_timeseries(
     try:
         yf_logger = logging.getLogger("yfinance")
         yf_logger.disabled = True
+        start = str(market_data.start)
+        end = str(market_data.end)
+        timeframe = market_data.timeframe
+        curr_pair = f"{market_data.instrument.base_currency}{market_data.instrument.quote_currency}=X"
         data = yf.download(
-            tickers=instrument.base_currency,
-            start=start_date,
-            end=end_date,
-            interval=bar.timeframe,
+            tickers=curr_pair,
+            start=start,
+            end=end,
+            interval=timeframe,
             multi_level_index=False,
             progress=False,
         )
@@ -46,6 +44,8 @@ def get_timeseries(
         data = data.reset_index()
         data = data[["Date", "Close"]]
         data = data.rename(columns={"Date": "date", "Close": "rate"})
-        return data
+        market_data.bars=data
+        print(market_data.bars)
+        return market_data
     except Exception:
         return None

@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import date
-from argus.domain.internal_models import DataSource, PriceBar, Instrument
+from argus.domain.internal_models import DataSource, PriceBar, Instrument,MarketDataSet
 from argus.clients.yfinance_client import get_timeseries
 from argus.storage.database import read_price_bars
 from argus.analytics.metrics.trend_metrics import (
@@ -40,12 +40,8 @@ def prepare_trend_analysis(df: pd.DataFrame):
 
 def get_market_data(
     db: str,
-    source: DataSource,
-    instrument: Instrument,
-    bar: PriceBar,
-    start_date: date,
-    end_date: date,
-) -> pd.DataFrame | None:
+    market_data: MarketDataSet,
+) -> MarketDataSet | None:
     """
     Get a time series either from local stroage or client with first-storage-workflow
 
@@ -62,23 +58,33 @@ def get_market_data(
         DataFrame with dates and rates. Returns
         ``None`` if no time-series data could be fetched.
     """
+    source = DataSource(name="YFinance API",provider_kind="yfinance")
+    instrument = Instrument(symbol="EUR - USD",name="EUR/USD",asset_class="fx",base_currency="EUR",quote_currency="USD")
+    market_data = MarketDataSet(
+    source=source,
+    instrument=instrument,
+    timeframe="1d",
+    start=date(2026, 1, 1),
+    end=date(2026, 1, 4),
+    bars=pd.DataFrame(),
+)
     df, isNotEmpty = read_price_bars(
         db=db,
-        source=source,
-        instrument=instrument,
-        start_date=start_date,
-        end_date=end_date,
+        source=market_data.source,
+        instrument=market_data.instrument,
+        start_date=market_data.start,
+        end_date=market_data.end,
     )
-    if isNotEmpty:
-        return df
+    market_data.source
+    market_data.instrument
+    market_data.timeframe
+    market_data.start
+    market_data.end
+    market_data.bars=df
+    if not(isNotEmpty):
+        return market_data
     else:
-        df = get_timeseries(
-            source=source,
-            instrument=instrument,
-            bar=bar,
-            start_date=start_date,
-            end_date=end_date,
-        )
-    if df is None:
+        other_market_data = get_timeseries(market_data=market_data)
+    if other_market_data is None:
         return None
-    return df
+    return other_market_data

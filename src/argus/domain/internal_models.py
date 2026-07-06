@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
+import pandas as pd
 
 
 @dataclass
@@ -32,3 +33,12 @@ class PriceBar:
     low: float | None = None
     adjusted_close: float | None = None
     volume: float | None = None
+
+@dataclass
+class MarketDataSet:
+    source: DataSource
+    instrument: Instrument
+    timeframe: str
+    start: date
+    end: date
+    bars: pd.DataFrame
