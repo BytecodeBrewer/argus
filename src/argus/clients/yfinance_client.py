@@ -4,7 +4,8 @@ from datetime import date
 from argus.domain.internal_models import MarketDataSet
 import pandas as pd
 
-def get_timeseries(market_data:MarketDataSet) -> MarketDataSet | None:
+
+def get_timeseries(market_data: MarketDataSet) -> MarketDataSet | None:
     """
     Fetch historical exchange-rate time series data from Yahoo Finance.
 
@@ -44,7 +45,7 @@ def get_timeseries(market_data:MarketDataSet) -> MarketDataSet | None:
         data = data.reset_index()
         data = data[["Date", "Close"]]
         data = data.rename(columns={"Date": "date", "Close": "rate"})
-        market_data.bars=data
+        market_data.bars = data
         print(market_data.bars)
         return market_data
     except Exception:

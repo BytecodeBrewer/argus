@@ -168,7 +168,7 @@ def test_read_price_bars_returns_matching_data(tmp_path):
     initialize_database(db)
     insert_price_bar(db, pricebar)
 
-    result,isNotEmpty = read_price_bars(
+    result, isNotEmpty = read_price_bars(
         db=db,
         source=source,
         instrument=instrument,
@@ -211,7 +211,7 @@ def test_read_price_bars_returns_empty_dataframe_for_missing_range(tmp_path):
     initialize_database(db)
     insert_price_bar(db, pricebar)
 
-    result,isNotEmpty = read_price_bars(
+    result, isNotEmpty = read_price_bars(
         db=db,
         source=source,
         instrument=instrument,
@@ -219,4 +219,4 @@ def test_read_price_bars_returns_empty_dataframe_for_missing_range(tmp_path):
         end_date=date(2027, 1, 31),
     )
 
-    assert not(isNotEmpty) is True
+    assert not (isNotEmpty) is True

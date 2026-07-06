@@ -4,20 +4,20 @@ import numpy as np
 from datetime import date
 from argus.services.market_data_service import get_market_data
 from argus.storage.database import initialize_database
-from argus.domain.internal_models import DataSource,Instrument,MarketDataSet
+from argus.domain.internal_models import DataSource, Instrument, MarketDataSet
 
 
 def test_get_a_full_timeseries(tmp_path):
-    source = DataSource(name="YFinance API",provider_kind="yfinance")
-    instrument = Instrument(symbol="EUR - USD",name="EUR/USD",asset_class="fx")
+    source = DataSource(name="YFinance API", provider_kind="yfinance")
+    instrument = Instrument(symbol="EUR - USD", name="EUR/USD", asset_class="fx")
     market_data = MarketDataSet(
-    source=source,
-    instrument=instrument,
-    timeframe="1d",
-    start=date(2024, 1, 1),
-    end=date(2024, 1, 4),
-    bars=pd.DataFrame(),
-)
+        source=source,
+        instrument=instrument,
+        timeframe="1d",
+        start=date(2024, 1, 1),
+        end=date(2024, 1, 4),
+        bars=pd.DataFrame(),
+    )
     db = tmp_path / "test.duckdb"
     expect_result = {
         "date": ["2024-01-01", "2024-01-02", "2024-01-03"],
@@ -32,7 +32,7 @@ def test_get_a_full_timeseries(tmp_path):
         "max_rate": [1.1055831909179688],
     }
     initialize_database(db)
-    result = get_market_data(db=db,market_data=market_data)
+    result = get_market_data(db=db, market_data=market_data)
 
     assert result is not None
     """
