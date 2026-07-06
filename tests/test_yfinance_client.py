@@ -1,6 +1,6 @@
 from argus.clients.yfinance_client import get_timeseries
 from argus.domain.internal_models import DataSource, Instrument, MarketDataSet
-from datetime import date 
+from datetime import date
 import pandas as pd
 import pandas.testing as pdt
 
@@ -13,8 +13,14 @@ def test_get_dataframe(monkeypatch):
         index=pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
     )
     test_resp.index.name = "Date"
-    source = DataSource(name="YFinance API",provider_kind="yfinance")
-    instrument = Instrument(symbol="EUR - USD",name="EUR/USD",asset_class="fx",base_currency="EUR",quote_currency="USD")
+    source = DataSource(name="YFinance API", provider_kind="yfinance")
+    instrument = Instrument(
+        symbol="EUR - USD",
+        name="EUR/USD",
+        asset_class="fx",
+        base_currency="EUR",
+        quote_currency="USD",
+    )
     market_data = MarketDataSet(
         source=source,
         instrument=instrument,
@@ -23,6 +29,7 @@ def test_get_dataframe(monkeypatch):
         end=date(2024, 1, 4),
         bars=pd.DataFrame(),
     )
+
     def fake_yfinance_download(*args, **kwargs):
         return test_resp
 
@@ -35,22 +42,22 @@ def test_get_dataframe(monkeypatch):
         }
     )
 
-    
     assert result is not None
     pdt.assert_frame_equal(result.bars, expected)
 
 
 def test_get_none(monkeypatch):
-    source = DataSource(name="YFinance API",provider_kind="yfinance")
-    instrument = Instrument(symbol="EUR - USD",name="EUR/USD",asset_class="fx")
+    source = DataSource(name="YFinance API", provider_kind="yfinance")
+    instrument = Instrument(symbol="EUR - USD", name="EUR/USD", asset_class="fx")
     market_data = MarketDataSet(
-    source=source,
-    instrument=instrument,
-    timeframe="1d",
-    start=date(2026, 1, 1),
-    end=date(2026, 1, 4),
-    bars=pd.DataFrame(),
-)
+        source=source,
+        instrument=instrument,
+        timeframe="1d",
+        start=date(2026, 1, 1),
+        end=date(2026, 1, 4),
+        bars=pd.DataFrame(),
+    )
+
     def fake_yfinance_download(*args, **kwargs):
         return None
 
@@ -61,16 +68,16 @@ def test_get_none(monkeypatch):
 
 
 def test_get_empty_frame(monkeypatch):
-    source = DataSource(name="YFinance API",provider_kind="yfinance")
-    instrument = Instrument(symbol="EUR - USD",name="EUR/USD",asset_class="fx")
+    source = DataSource(name="YFinance API", provider_kind="yfinance")
+    instrument = Instrument(symbol="EUR - USD", name="EUR/USD", asset_class="fx")
     market_data = MarketDataSet(
-    source=source,
-    instrument=instrument,
-    timeframe="1d",
-    start=date(2026, 1, 1),
-    end=date(2026, 1, 1),
-    bars=pd.DataFrame(),
-)
+        source=source,
+        instrument=instrument,
+        timeframe="1d",
+        start=date(2026, 1, 1),
+        end=date(2026, 1, 1),
+        bars=pd.DataFrame(),
+    )
 
     def fake_yfinance_download(*args, **kwargs):
         return pd.DataFrame()
@@ -83,16 +90,16 @@ def test_get_empty_frame(monkeypatch):
 
 def test_error_raise(monkeypatch):
     # start date is inclusiv and end date is exclusiv - the range 2024-01-01-2024-01-01 is not possible
-    source = DataSource(name="YFinance API",provider_kind="yfinance")
-    instrument = Instrument(symbol="EUR - USD",name="EUR/USD",asset_class="fx")
+    source = DataSource(name="YFinance API", provider_kind="yfinance")
+    instrument = Instrument(symbol="EUR - USD", name="EUR/USD", asset_class="fx")
     market_data = MarketDataSet(
-    source=source,
-    instrument=instrument,
-    timeframe="1d",
-    start=date(2026, 1, 1),
-    end=date(2026, 1, 1),
-    bars=pd.DataFrame(),
-)
+        source=source,
+        instrument=instrument,
+        timeframe="1d",
+        start=date(2026, 1, 1),
+        end=date(2026, 1, 1),
+        bars=pd.DataFrame(),
+    )
 
     def fake_yfinance_download():
         raise Exception("fake yfinance error")

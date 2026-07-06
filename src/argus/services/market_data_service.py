@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import date
-from argus.domain.internal_models import DataSource, PriceBar, Instrument,MarketDataSet
+from argus.domain.internal_models import DataSource, PriceBar, Instrument, MarketDataSet
 from argus.clients.yfinance_client import get_timeseries
 from argus.storage.database import read_price_bars
 from argus.analytics.metrics.trend_metrics import (
@@ -58,16 +58,22 @@ def get_market_data(
         DataFrame with dates and rates. Returns
         ``None`` if no time-series data could be fetched.
     """
-    source = DataSource(name="YFinance API",provider_kind="yfinance")
-    instrument = Instrument(symbol="EUR - USD",name="EUR/USD",asset_class="fx",base_currency="EUR",quote_currency="USD")
+    source = DataSource(name="YFinance API", provider_kind="yfinance")
+    instrument = Instrument(
+        symbol="EUR - USD",
+        name="EUR/USD",
+        asset_class="fx",
+        base_currency="EUR",
+        quote_currency="USD",
+    )
     market_data = MarketDataSet(
-    source=source,
-    instrument=instrument,
-    timeframe="1d",
-    start=date(2026, 1, 1),
-    end=date(2026, 1, 4),
-    bars=pd.DataFrame(),
-)
+        source=source,
+        instrument=instrument,
+        timeframe="1d",
+        start=date(2026, 1, 1),
+        end=date(2026, 1, 4),
+        bars=pd.DataFrame(),
+    )
     df, isNotEmpty = read_price_bars(
         db=db,
         source=market_data.source,
@@ -80,8 +86,8 @@ def get_market_data(
     market_data.timeframe
     market_data.start
     market_data.end
-    market_data.bars=df
-    if not(isNotEmpty):
+    market_data.bars = df
+    if not (isNotEmpty):
         return market_data
     else:
         other_market_data = get_timeseries(market_data=market_data)

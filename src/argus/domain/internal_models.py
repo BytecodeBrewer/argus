@@ -34,6 +34,7 @@ class PriceBar:
     adjusted_close: float | None = None
     volume: float | None = None
 
+
 @dataclass
 class MarketDataSet:
     source: DataSource
