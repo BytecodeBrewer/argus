@@ -77,11 +77,6 @@ def show_trend() -> None:
     global trend_canvas
     global trend_chart_widget
 
-    curr_symbol = "EURUSD=X"
-    start = "2024-01-01"
-    end = "2025-01-01"
-    interval = "1d"
-
     calc_frame.pack_forget()
     conv_frame.pack_forget()
     menu_frame.pack_forget()

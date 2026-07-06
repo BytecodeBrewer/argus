@@ -1,6 +1,4 @@
 import pandas as pd
-import pandas.testing as pdt
-import numpy as np
 from datetime import date
 from argus.services.market_data_service import get_market_data
 from argus.storage.database import initialize_database
@@ -19,18 +17,7 @@ def test_get_a_full_timeseries(tmp_path):
         bars=pd.DataFrame(),
     )
     db = tmp_path / "test.duckdb"
-    expect_result = {
-        "date": ["2024-01-01", "2024-01-02", "2024-01-03"],
-        "rate": [1.1055831909179688, 1.1038745641708374, 1.0941756963729858],
-        "daily_pct_change": [np.nan, -0.1545452898675692, -0.8786204622023064],
-        "roll_avg": [1.1055831909179688, 1.104728877544403, 1.101211150487264],
-    }
-    expect_dict = {
-        "min_date": ["2024-01-03 00:00:00"],
-        "min_rate": [1.0941756963729858],
-        "max_date": ["2024-01-01 00:00:00"],
-        "max_rate": [1.1055831909179688],
-    }
+
     initialize_database(db)
     result = get_market_data(db=db, market_data=market_data)
 
