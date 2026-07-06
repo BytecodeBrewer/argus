@@ -219,4 +219,4 @@ def test_read_price_bars_returns_empty_dataframe_for_missing_range(tmp_path):
         end_date=date(2027, 1, 31),
     )
 
-    assert not (isNotEmpty) is True
+    assert isNotEmpty is not True

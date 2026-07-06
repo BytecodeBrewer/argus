@@ -1,8 +1,6 @@
 import yfinance as yf
 import logging
-from datetime import date
 from argus.domain.internal_models import MarketDataSet
-import pandas as pd
 
 
 def get_timeseries(market_data: MarketDataSet) -> MarketDataSet | None:

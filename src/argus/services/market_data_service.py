@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import date
-from argus.domain.internal_models import DataSource, PriceBar, Instrument, MarketDataSet
+from argus.domain.internal_models import DataSource, Instrument, MarketDataSet
 from argus.clients.yfinance_client import get_timeseries
 from argus.storage.database import read_price_bars
 from argus.analytics.metrics.trend_metrics import (
