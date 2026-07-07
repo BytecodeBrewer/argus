@@ -1,13 +1,14 @@
 import tkinter as tk
-
-import pandas as pd
+from datetime import date
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+from argus.services.trend_analysis_service import prepare_trend_analysis
+from legacy.services.calculator_service import calc, check_op
+from argus.services.market_data_service import convert
+from argus.domain.validation import parse_amount,check_currency
+from argus.domain.internal_models import DataSource,Instrument,MarketDataRequest,MarketDataResponse
 
-from argus.domain.validation import parse_amount
-from argus.services.calculator_service import calc, check_op
-from argus.services.conversion_service import check_currency, convert
-from argus.services.market_data_service import prepare_trend_analysis
-
+db=""
 
 def on_close() -> None:
     """
@@ -71,7 +72,7 @@ def show_conv() -> None:
     conv_frame.pack(fill=tk.BOTH, expand=True)
 
 
-def show_trend() -> None:
+def show_trend(db:str) -> None:
     """
     Displays the trend chart in the application. It prepares the data for trend analysis,
     creates the trend chart, and updates the GUI to show the chart.
@@ -88,10 +89,26 @@ def show_trend() -> None:
     content.pack(side="top", fill=tk.BOTH, expand=True)
 
     if trend_canvas is None:
-        df = pd.DataFrame()
-        fig = prepare_trend_analysis(df)
-        if fig is None:
-            return
+        source = DataSource(
+            name="",
+            provider_kind=""
+        )
+        instrument = Instrument(
+            symbol="EUR/USD",
+            name="EUR - USD",
+            asset_class="fx"
+        )
+        req = MarketDataRequest(
+            source=source,
+            instrument=instrument,
+            timeframe="1d",
+            start=date(2026,1,1),
+            end=date(2026,1,4)
+
+        )
+        fig = prepare_trend_analysis(db, req)
+        if not isinstance(fig, Figure):
+            return None
         fig.set_size_inches(7, 4)
 
         trend_canvas = FigureCanvasTkAgg(fig, master=content)
@@ -147,6 +164,25 @@ def act_convert() -> None:
     resp1 = check_currency(curr1.get())
     resp2 = check_currency(curr2.get())
     amount = parse_amount(amount_e.get())
+    source = DataSource(
+            name="Exchange API",
+            provider_kind="ex-api"
+        )
+    instrument = Instrument(
+            symbol="EUR/USD",
+            name="EUR - USD",
+            asset_class="fx",
+            base_currency=resp1,
+            quote_currency=resp2
+        )
+    req = MarketDataRequest(
+            source=source,
+            instrument=instrument,
+            timeframe="1d",
+            start=date(2026,1,1),
+            end=date(2026,1,4)
+
+    )
 
     if resp1 is None:
         result_conv_label.config(text="Please enter a valid currency for 'Currency 1'")
@@ -162,7 +198,7 @@ def act_convert() -> None:
         )
         return
 
-    response = convert(amount, resp1, resp2)
+    response = convert(amount,req)
 
     if response is None:
         result_conv_label.config(text="Currency conversion error")
@@ -253,11 +289,11 @@ num1.focus()
 # Buttons
 from_menu_calc = tk.Button(menu_frame, text="Calculator", command=show_calc)
 from_menu_conv = tk.Button(menu_frame, text="Converter", command=show_conv)
-from_menu_trend_chart = tk.Button(menu_frame, text="Trend Chart", command=show_trend)
+from_menu_trend_chart = tk.Button(menu_frame, text="Trend Chart", command=lambda: show_trend(db))
 
 from_sidebar_calc = tk.Button(sidebar, text="Calculator", command=show_calc)
 from_sidebar_conv = tk.Button(sidebar, text="Converter", command=show_conv)
-from_sidebar_trend_chart = tk.Button(sidebar, text="Trend Chart", command=show_trend)
+from_sidebar_trend_chart = tk.Button(sidebar, text="Trend Chart", command=lambda: show_trend(db))
 return_menu = tk.Button(sidebar, text="Back to menu", command=show_menu)
 
 click_calculate = tk.Button(calc_frame, text="Calculate", command=act_calculate)

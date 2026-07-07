@@ -211,3 +211,18 @@ def is_valid_op(op: str) -> bool:
     Return: bool - True if the operation is valid, otherwise False
     """
     return op in VALID_OPS
+
+def check_currency(question: str) -> str | None:
+    """
+    Checks if the input question contains a valid currency code.
+
+    Arg1: question: str - the question to be checked for a valid currency code
+
+    Return: str or None - the valid currency code if found, otherwise None
+    """
+    resp = normalize_input_string(question)
+
+    if is_valid_curr_code(resp):
+        return resp
+
+    return None
