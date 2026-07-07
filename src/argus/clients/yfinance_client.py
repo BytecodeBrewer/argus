@@ -1,6 +1,5 @@
 import yfinance as yf
 import pandas as pd
-import logging
 from argus.domain.internal_models import (
     MarketDataRequest,
     PRICE_BAR_COLUMNS,
@@ -36,7 +35,7 @@ def get_timeseries(request: MarketDataRequest) -> pd.DataFrame:
         or "Close" not in raw_resp.columns
         or raw_resp["Close"].dropna().empty
     ):
-        raise ValueError(f"Quote not found or no data available for symbol")
+        raise ValueError("Quote not found or no data available for symbol")
 
     resp = normalize_yfinance_bars(raw_resp)
     return resp
