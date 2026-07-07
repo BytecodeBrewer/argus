@@ -1,7 +1,13 @@
 import duckdb
 from datetime import date
 import pandas as pd
-from argus.domain.internal_models import DataSource, PriceBar, Instrument
+from argus.domain.internal_models import (
+    DataSource,
+    Instrument,
+    MarketDataRequest,
+    MarketDataResponse,
+    PRICE_BAR_COLUMNS,
+)
 
 
 def initialize_database(database_path: str) -> None:
@@ -186,7 +192,7 @@ def get_or_create_instrument(connection, instrument: Instrument) -> int:
     return result[0]
 
 
-def insert_price_bar(db: str, price_bar: PriceBar) -> None:
+def insert_price_bar(db: str, marketdata: MarketDataResponse) -> None:
     """
     Insert a price bar into the database.
 
@@ -207,7 +213,6 @@ def insert_price_bar(db: str, price_bar: PriceBar) -> None:
             source_id,
             instrument_id,
             timestamp,
-            timeframe,
             close,
             open,
             high,
@@ -215,39 +220,35 @@ def insert_price_bar(db: str, price_bar: PriceBar) -> None:
             adjusted_close,
             volume
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT DO NOTHING;
         """
     connection = duckdb.connect(db)
     try:
-        source_id = get_or_create_source(connection, price_bar.source)
-        instrument_id = get_or_create_instrument(connection, price_bar.instrument)
-        connection.execute(
-            query=insert_query,
-            parameters=[
-                source_id,
-                instrument_id,
-                price_bar.timestamp,
-                price_bar.timeframe,
-                price_bar.close,
-                price_bar.open,
-                price_bar.high,
-                price_bar.low,
-                price_bar.adjusted_close,
-                price_bar.volume,
-            ],
-        )
+        source_id = get_or_create_source(connection, marketdata.source)
+        instrument_id = get_or_create_instrument(connection, marketdata.instrument)
+        if marketdata.bars is None:
+            return None
+        for _, row in marketdata.bars.iterrows():
+            connection.execute(
+                query=insert_query,
+                parameters=[
+                    source_id,
+                    instrument_id,
+                    MarketDataResponse.bars["time"],
+                    MarketDataResponse.bars["close"],
+                    MarketDataResponse.bars["open"],
+                    MarketDataResponse.bars["high"],
+                    MarketDataResponse.bars["low"],
+                    MarketDataResponse.bars["adjusted_close"],
+                    MarketDataResponse.bars["volume"],
+                ],
+            )
     finally:
         connection.close()
 
 
-def read_price_bars(
-    db: str,
-    source: DataSource,
-    instrument: Instrument,
-    start_date: date,
-    end_date: date,
-) -> tuple[pd.DataFrame, bool]:
+def read_price_bars(db: str, request: MarketDataRequest) -> pd.DataFrame:
     """
     Read price bars for a source, instrument, and date range.
 
@@ -292,13 +293,12 @@ def read_price_bars(
         result = connection.execute(
             query=search_query,
             parameters=[
-                source.name,
-                instrument.symbol,
-                start_date,
-                end_date,
+                request.source.name,
+                request.instrument.symbol,
+                request.start,
+                request.end,
             ],
         ).df()
-        isNotEmpty = not result.empty
     finally:
         connection.close()
-    return result, isNotEmpty
+    return result

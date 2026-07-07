@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import date
-from argus.domain.internal_models import DataSource, Instrument, MarketDataSet
+from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest,MarketDataResponse
 from argus.clients.yfinance_client import get_timeseries
 from argus.storage.database import read_price_bars
 from argus.analytics.metrics.trend_metrics import (
@@ -32,16 +32,14 @@ def prepare_trend_analysis(df: pd.DataFrame):
     df = add_daily_percentage_change(df)
     df = add_rolling_average(df)
     min_max_rates = get_min_max_rates(df)
-    if df is None:
-        return None
     fig = create_trendchart(df, min_max_rates)
     return fig
 
 
 def get_market_data(
     db: str,
-    market_data: MarketDataSet,
-) -> MarketDataSet | None:
+    request: MarketDataRequest,
+) -> MarketDataResponse | None:
     """
     Get a time series either from local stroage or client with first-storage-workflow
 
@@ -58,39 +56,18 @@ def get_market_data(
         DataFrame with dates and rates. Returns
         ``None`` if no time-series data could be fetched.
     """
-    source = DataSource(name="YFinance API", provider_kind="yfinance")
-    instrument = Instrument(
-        symbol="EUR - USD",
-        name="EUR/USD",
-        asset_class="fx",
-        base_currency="EUR",
-        quote_currency="USD",
-    )
-    market_data = MarketDataSet(
-        source=source,
-        instrument=instrument,
-        timeframe="1d",
-        start=date(2026, 1, 1),
-        end=date(2026, 1, 4),
-        bars=pd.DataFrame(),
-    )
-    df, isNotEmpty = read_price_bars(
-        db=db,
-        source=market_data.source,
-        instrument=market_data.instrument,
-        start_date=market_data.start,
-        end_date=market_data.end,
-    )
-    market_data.source
-    market_data.instrument
-    market_data.timeframe
-    market_data.start
-    market_data.end
-    market_data.bars = df
-    if not (isNotEmpty):
-        return market_data
-    else:
-        other_market_data = get_timeseries(market_data=market_data)
-    if other_market_data is None:
-        return None
-    return other_market_data
+    bars = read_price_bars(db,request)
+    if not (bars.empty):
+        db_response = MarketDataResponse(
+            source=request.source,
+            instrument=request.instrument,
+            bars=bars)
+        return db_response
+    
+    bars = get_timeseries(request)
+    if not (bars.empty):
+        api_response = MarketDataResponse(
+        source=request.source,
+        instrument=request.instrument,
+        bars=bars)
+        return api_response
