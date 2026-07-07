@@ -1,5 +1,4 @@
 import duckdb
-from datetime import date
 import pandas as pd
 from argus.domain.internal_models import (
     DataSource,
@@ -53,7 +52,6 @@ def initialize_database(database_path: str) -> None:
             source_id INTEGER NOT NULL,
             instrument_id INTEGER NOT NULL,
             timestamp DATE NOT NULL,
-            timeframe TEXT NOT NULL,
             close DOUBLE NOT NULL,
             open DOUBLE,
             high DOUBLE,
@@ -62,7 +60,7 @@ def initialize_database(database_path: str) -> None:
             volume DOUBLE,
             FOREIGN KEY (source_id) REFERENCES data_sources (id),
             FOREIGN KEY (instrument_id) REFERENCES instruments (id),
-            UNIQUE (source_id, instrument_id, timestamp, timeframe)
+            UNIQUE (source_id, instrument_id, timestamp,close)
         );
         """,
     ]
@@ -203,7 +201,7 @@ def insert_price_bar(db: str, marketdata: MarketDataResponse) -> None:
     Args:
         db (str): Path to the DuckDB database file.
         price_bar (PriceBar): Price bar model containing source,
-            instrument, timestamp, timeframe, and market values.
+            instrument, timestamp and market values.
 
     Returns:
         None
@@ -235,13 +233,13 @@ def insert_price_bar(db: str, marketdata: MarketDataResponse) -> None:
                 parameters=[
                     source_id,
                     instrument_id,
-                    MarketDataResponse.bars["time"],
-                    MarketDataResponse.bars["close"],
-                    MarketDataResponse.bars["open"],
-                    MarketDataResponse.bars["high"],
-                    MarketDataResponse.bars["low"],
-                    MarketDataResponse.bars["adjusted_close"],
-                    MarketDataResponse.bars["volume"],
+                    row["timestamp"],
+                    row["close"],
+                    row["open"],
+                    row["high"],
+                    row["low"],
+                    row["adjusted_close"],
+                    row["volume"],
                 ],
             )
     finally:
@@ -272,7 +270,6 @@ def read_price_bars(db: str, request: MarketDataRequest) -> pd.DataFrame:
         data_sources.name AS source_name,
         instruments.symbol AS instrument_symbol,
         price_bars.timestamp,
-        price_bars.timeframe,
         price_bars.open,
         price_bars.high,
         price_bars.low,

@@ -20,7 +20,7 @@ def get_timeseries(request: MarketDataRequest) -> pd.DataFrame:
             "1d", "1h", or "15m".
 
     Returns:
-        pandas.DataFrame | empty pandas.DataFrame: A DataFrame containing pricebars columns if data was successfully fetched. 
+        pandas.DataFrame | empty pandas.DataFrame: A DataFrame containing pricebars columns if data was successfully fetched.
         Returns empty pandas.DataFrame if the request fails and an exception occurs (with an error message).
     """
     try:

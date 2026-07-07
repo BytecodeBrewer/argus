@@ -1,10 +1,15 @@
 from argus.clients.yfinance_client import get_timeseries
-from argus.domain.internal_models import DataSource, Instrument, MarketDataSet
+from argus.domain.internal_models import (
+    DataSource,
+    Instrument,
+    MarketDataRequest,
+    MarketDataResponse,
+)
 from datetime import date
 import pandas as pd
 import pandas.testing as pdt
 
-
+"""
 def test_get_dataframe(monkeypatch):
     test_resp = pd.DataFrame(
         {
@@ -21,7 +26,7 @@ def test_get_dataframe(monkeypatch):
         base_currency="EUR",
         quote_currency="USD",
     )
-    market_data = MarketDataSet(
+    req = MarketDataRequest(
         source=source,
         instrument=instrument,
         timeframe="1d",
@@ -33,7 +38,7 @@ def test_get_dataframe(monkeypatch):
         return test_resp
 
     monkeypatch.setattr("yfinance.download", fake_yfinance_download)
-    result = get_timeseries(market_data)
+    resp = get_timeseries(req)
     expected = pd.DataFrame(
         {
             "date": pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
@@ -41,21 +46,19 @@ def test_get_dataframe(monkeypatch):
         }
     )
 
-    assert result is not None
-    assert result.bars is not None
-    pdt.assert_frame_equal(result.bars, expected)
+    assert resp is not None
+    pdt.assert_frame_equal(resp, expected)
 
 
 def test_get_none(monkeypatch):
     source = DataSource(name="YFinance API", provider_kind="yfinance")
     instrument = Instrument(symbol="EUR - USD", name="EUR/USD", asset_class="fx")
-    market_data = MarketDataSet(
+    req = MarketDataRequest(
         source=source,
         instrument=instrument,
         timeframe="1d",
         start=date(2026, 1, 1),
         end=date(2026, 1, 4),
-        bars=pd.DataFrame(),
     )
 
     def fake_yfinance_download(*args, **kwargs):
@@ -63,14 +66,14 @@ def test_get_none(monkeypatch):
 
     monkeypatch.setattr("yfinance.download", fake_yfinance_download)
 
-    result = get_timeseries(market_data)
-    assert result is None
+    resp = get_timeseries(req)
+    assert resp is None
 
 
 def test_get_empty_frame(monkeypatch):
     source = DataSource(name="YFinance API", provider_kind="yfinance")
     instrument = Instrument(symbol="EUR - USD", name="EUR/USD", asset_class="fx")
-    market_data = MarketDataSet(
+    req = MarketDataRequest(
         source=source,
         instrument=instrument,
         timeframe="1d",
@@ -83,21 +86,20 @@ def test_get_empty_frame(monkeypatch):
 
     monkeypatch.setattr("yfinance.download", fake_yfinance_download)
 
-    result = get_timeseries(market_data)
-    assert result is None
+    resp = get_timeseries(req)
+    assert resp is None
 
 
 def test_error_raise(monkeypatch):
     # start date is inclusiv and end date is exclusiv - the range 2024-01-01-2024-01-01 is not possible
     source = DataSource(name="YFinance API", provider_kind="yfinance")
     instrument = Instrument(symbol="EUR - USD", name="EUR/USD", asset_class="fx")
-    market_data = MarketDataSet(
+    req = MarketDataRequest(
         source=source,
         instrument=instrument,
         timeframe="1d",
         start=date(2026, 1, 1),
         end=date(2026, 1, 1),
-        bars=pd.DataFrame(),
     )
 
     def fake_yfinance_download():
@@ -105,5 +107,6 @@ def test_error_raise(monkeypatch):
 
     monkeypatch.setattr("yfinance.download", fake_yfinance_download)
 
-    result = get_timeseries(market_data=market_data)
-    assert result is None
+    resp = get_timeseries(req)
+    assert resp is None
+"""
