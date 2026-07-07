@@ -7,7 +7,7 @@ from argus.config import (
 from argus.domain.internal_models import MarketDataRequest
 
 
-def get_rates(req:MarketDataRequest) -> dict | None:
+def get_rates(req: MarketDataRequest) -> dict | None:
     """
     Get the exchange rate between two currencies using the ExchangeRate-API.
 

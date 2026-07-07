@@ -52,7 +52,8 @@ def get_market_data(
             message=str(e),
         )
 
-def get_conv_rate(req:MarketDataRequest) -> float | None:
+
+def get_conv_rate(req: MarketDataRequest) -> float | None:
     """
     Gets the conversion rate between two currencies.
 
@@ -85,4 +86,3 @@ def convert(amount: float, req: MarketDataRequest) -> float | None:
     if rate is not None:
         return amount * rate
     return None
-

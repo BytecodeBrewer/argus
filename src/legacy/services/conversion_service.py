@@ -2,6 +2,7 @@ from argus.clients import exchangerate_client as ex_client
 from argus.domain.validation import normalize_input_string, is_valid_curr_code
 from argus.domain.internal_models import MarketDataRequest
 
+
 def check_currency(question: str) -> str | None:
     """
     Checks if the input question contains a valid currency code.
@@ -27,13 +28,13 @@ def get_conv_rate(resp1, resp2) -> float | None:
 
     Return: float or None - the conversion rate if found, otherwise None
     """
-    
-    #data = ex_client.get_rates(req)
+
+    # data = ex_client.get_rates(req)
 
     if 0 is None:
         return None
 
-    return None #float(data["conversion_rate"])
+    return None  # float(data["conversion_rate"])
 
 
 def convert(amount: float, resp1: str, resp2: str) -> float | None:
