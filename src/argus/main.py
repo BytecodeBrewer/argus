@@ -1,11 +1,14 @@
 from argus.gui.app import app
+from argus.storage.database import initialize_database
 
 
-def main() -> None:
+def main(db) -> None:
     """
     The main function that starts the application.
     """
+    initialize_database(db)
     app()
 
 
-main()
+db = ""
+main(db)

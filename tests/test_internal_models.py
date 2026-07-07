@@ -54,7 +54,9 @@ def test_market_data_response_raises_error_if_not_a_dataframe(
 
     with pytest.raises(TypeError) as exc_info:
         MarketDataResponse(
-            source=valid_source, instrument=valid_instrument, bars=invalid_input
-        )  # type: ignore
+            source=valid_source,
+            instrument=valid_instrument,
+            bars=invalid_input,  # type: ignore
+        )
 
     assert "must be a pandas DataFrame" in str(exc_info.value)
