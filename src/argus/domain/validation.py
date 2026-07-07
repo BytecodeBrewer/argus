@@ -212,6 +212,7 @@ def is_valid_op(op: str) -> bool:
     """
     return op in VALID_OPS
 
+
 def check_currency(question: str) -> str | None:
     """
     Checks if the input question contains a valid currency code.
