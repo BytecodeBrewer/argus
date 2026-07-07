@@ -21,25 +21,38 @@ class Instrument:
     quote_currency: str | None = None
 
 
-@dataclass
-class PriceBar:
-    source: DataSource
-    instrument: Instrument
-    timestamp: date
-    timeframe: str
-    close: float
-    open: float | None = None
-    high: float | None = None
-    low: float | None = None
-    adjusted_close: float | None = None
-    volume: float | None = None
+PRICE_BAR_COLUMNS = (
+    "timestamp",
+    "open",
+    "high",
+    "low",
+    "close",
+    "adjusted_close",
+    "volume",
+)
+
+YFINANCE_PRICE_BAR_MAPPING = {
+    "Date": "timestamp",
+    "Open": "open",
+    "High": "high",
+    "Low": "low",
+    "Close": "close",
+    "Adj Close": "adjusted_close",
+    "Volume": "volume",
+}
 
 
 @dataclass
-class MarketDataSet:
+class MarketDataRequest:
     source: DataSource
     instrument: Instrument
     timeframe: str
     start: date
     end: date
+
+
+@dataclass
+class MarketDataResponse:
+    source: DataSource
+    instrument: Instrument
     bars: pd.DataFrame

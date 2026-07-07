@@ -27,7 +27,6 @@ def test_get_dataframe(monkeypatch):
         timeframe="1d",
         start=date(2024, 1, 1),
         end=date(2024, 1, 4),
-        bars=pd.DataFrame(),
     )
 
     def fake_yfinance_download(*args, **kwargs):
@@ -43,6 +42,7 @@ def test_get_dataframe(monkeypatch):
     )
 
     assert result is not None
+    assert result.bars is not None
     pdt.assert_frame_equal(result.bars, expected)
 
 
@@ -76,7 +76,6 @@ def test_get_empty_frame(monkeypatch):
         timeframe="1d",
         start=date(2026, 1, 1),
         end=date(2026, 1, 1),
-        bars=pd.DataFrame(),
     )
 
     def fake_yfinance_download(*args, **kwargs):

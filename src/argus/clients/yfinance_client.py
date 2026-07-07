@@ -1,9 +1,13 @@
 import yfinance as yf
-import logging
-from argus.domain.internal_models import MarketDataSet
+import pandas as pd
+from argus.domain.internal_models import (
+    MarketDataRequest,
+    PRICE_BAR_COLUMNS,
+    YFINANCE_PRICE_BAR_MAPPING,
+)
 
 
-def get_timeseries(market_data: MarketDataSet) -> MarketDataSet | None:
+def get_timeseries(request: MarketDataRequest) -> pd.DataFrame:
     """
     Fetch historical exchange-rate time series data from Yahoo Finance.
 
@@ -16,18 +20,17 @@ def get_timeseries(market_data: MarketDataSet) -> MarketDataSet | None:
             "1d", "1h", or "15m".
 
     Returns:
-        pandas.DataFrame | None: A DataFrame containing the columns ``date`` and
-        ``rate`` if data was successfully fetched. Returns ``None`` if the
-        request fails, returns no data, or an exception occurs.
+        pandas.DataFrame | empty pandas.DataFrame: A DataFrame containing pricebars columns if data was successfully fetched. 
+        Returns empty pandas.DataFrame if the request fails and an exception occurs (with an error message).
     """
     try:
-        yf_logger = logging.getLogger("yfinance")
-        yf_logger.disabled = True
-        start = str(market_data.start)
-        end = str(market_data.end)
-        timeframe = market_data.timeframe
-        curr_pair = f"{market_data.instrument.base_currency}{market_data.instrument.quote_currency}=X"
-        data = yf.download(
+        start = str(request.start)
+        end = str(request.end)
+        timeframe = request.timeframe
+        curr_pair = (
+            f"{request.instrument.base_currency}{request.instrument.quote_currency}=X"
+        )
+        raw_resp = yf.download(
             tickers=curr_pair,
             start=start,
             end=end,
@@ -35,16 +38,18 @@ def get_timeseries(market_data: MarketDataSet) -> MarketDataSet | None:
             multi_level_index=False,
             progress=False,
         )
-        yf_logger.disabled = False
-        if data is None:
-            return None
-        if data.empty:
-            return None
-        data = data.reset_index()
-        data = data[["Date", "Close"]]
-        data = data.rename(columns={"Date": "date", "Close": "rate"})
-        market_data.bars = data
-        print(market_data.bars)
-        return market_data
+        if raw_resp is None:
+            raise ConnectionError("Couldn't fetch data")
+        if raw_resp.empty:
+            raise ValueError("No data")
+        resp = normalize_yfinance_bars(raw_resp)
+        return resp
     except Exception:
-        return None
+        return pd.DataFrame()
+
+
+def normalize_yfinance_bars(raw_df: pd.DataFrame) -> pd.DataFrame:
+    df = raw_df.copy()
+    df = df.reset_index()
+    df = df.rename(columns=YFINANCE_PRICE_BAR_MAPPING)
+    return df[list(PRICE_BAR_COLUMNS)]
