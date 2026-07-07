@@ -4,8 +4,7 @@ from argus.domain.internal_models import (
     DataSource,
     Instrument,
     MarketDataRequest,
-    MarketDataResponse,
-    PRICE_BAR_COLUMNS,
+    MarketDataResponse
 )
 
 
