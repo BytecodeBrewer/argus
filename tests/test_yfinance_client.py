@@ -1,80 +1,118 @@
 from argus.clients.yfinance_client import get_timeseries
+from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest
+from datetime import date
+import pytest
 import pandas as pd
 import pandas.testing as pdt
 
 
-def test_get_dataframe(monkeypatch):
+@pytest.fixture
+def sample_source():
+    return DataSource(
+        name="Yahoo", provider_kind="yfinance_api", requires_api_key=False
+    )
+
+
+@pytest.fixture
+def sample_instrument():
+    return Instrument(
+        symbol="EUR/USD",
+        name="EUR - USD Rate",
+        asset_class="fx",
+        base_currency="EUR",
+        quote_currency="USD",
+    )
+
+
+def test_get_dataframe(monkeypatch, sample_source, sample_instrument):
     test_resp = pd.DataFrame(
         {
+            "Open": [None, None, None],
+            "High": [None, None, None],
+            "Low": [None, None, None],
             "Close": [1.105583, 1.103875, 1.094176],
+            "Adj Close": [None, None, None],
+            "Volume": [None, None, None],
         },
         index=pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
     )
     test_resp.index.name = "Date"
-    test_curr = "EURUSD=X"
-    test_start = "2024-01-01"
-    test_end = "2024-01-04"
-    test_interval = "1d"
+    req = MarketDataRequest(
+        source=sample_source,
+        instrument=sample_instrument,
+        timeframe="1d",
+        start=date(2024, 1, 1),
+        end=date(2024, 1, 4),
+    )
 
     def fake_yfinance_download(*args, **kwargs):
         return test_resp
 
     monkeypatch.setattr("yfinance.download", fake_yfinance_download)
-
-    result = get_timeseries(test_curr, test_start, test_end, test_interval)
+    resp = get_timeseries(req)
     expected = pd.DataFrame(
         {
-            "date": pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
-            "rate": [1.105583, 1.103875, 1.094176],
+            "timestamp": pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
+            "open": [None, None, None],
+            "high": [None, None, None],
+            "low": [None, None, None],
+            "close": [1.105583, 1.103875, 1.094176],
+            "adjusted_close": [None, None, None],
+            "volume": [None, None, None],
         }
     )
-    assert result is not None
-    pdt.assert_frame_equal(result, expected)
+
+    assert resp is not None
+    pdt.assert_frame_equal(resp, expected)
 
 
-def test_get_none(monkeypatch):
-    test_curr = "EURUSD=X"
-    test_start = "2024-01-01"
-    test_end = "2024-01-04"
-    test_interval = "1d"
+def test_client_network_error(monkeypatch, sample_source, sample_instrument):
+    req = MarketDataRequest(
+        source=sample_source,
+        instrument=sample_instrument,
+        timeframe="1d",
+        start=date(2024, 1, 1),
+        end=date(2024, 1, 4),
+    )
 
-    def fake_yfinance_download(*args, **kwargs):
-        return None
+    def mock_crash(*args, **kwargs):
+        raise Exception()
 
-    monkeypatch.setattr("yfinance.download", fake_yfinance_download)
+    monkeypatch.setattr("yfinance.download", mock_crash)
 
-    result = get_timeseries(test_curr, test_start, test_end, test_interval)
-    assert result is None
-
-
-def test_get_empty_frame(monkeypatch):
-    test_curr = "EURUSD=X"
-    test_start = "2024-01-01"
-    test_end = "2024-01-01"
-    test_interval = "1d"
-
-    def fake_yfinance_download(*args, **kwargs):
-        return pd.DataFrame()
-
-    monkeypatch.setattr("yfinance.download", fake_yfinance_download)
-
-    result = get_timeseries(test_curr, test_start, test_end, test_interval)
-    assert result is None
+    with pytest.raises(ConnectionError, match="Network error or connection timeout"):
+        get_timeseries(req)
 
 
-def test_error_raise(monkeypatch):
-    test_curr = "EURUSD=X"
-    # start date is inclusiv and end date is exclusiv - the range 2024-01-01-2024-01-01 is not possible
-    test_start = "2024-01-04"
-    test_end = "2024-01-02"
-    test_interval = "1d"
+def test_client_invalid_response(monkeypatch, sample_source, sample_instrument):
+    req = MarketDataRequest(
+        source=sample_source,
+        instrument=sample_instrument,
+        timeframe="1d",
+        start=date(2024, 1, 1),
+        end=date(2024, 1, 4),
+    )
 
-    def fake_yfinance_download(
-        tickers=test_curr, start=test_start, end=test_end, interval=test_interval
+    monkeypatch.setattr("yfinance.download", lambda *args, **kwargs: None)
+
+    with pytest.raises(
+        ConnectionError, match="Yahoo Finance API returned an invalid response"
     ):
-        raise Exception("fake yfinance error")
+        get_timeseries(req)
 
-    monkeypatch.setattr("yfinance.download", fake_yfinance_download)
 
-    result = get_timeseries(test_curr, test_start, test_end, test_interval)
-    assert result is None
+def test_client_quote_not_found(monkeypatch, sample_source, sample_instrument):
+    req = MarketDataRequest(
+        source=sample_source,
+        instrument=sample_instrument,
+        timeframe="1d",
+        start=date(2024, 1, 1),
+        end=date(2024, 1, 4),
+    )
+
+    monkeypatch.setattr("yfinance.download", lambda *args, **kwargs: pd.DataFrame())
+
+    with pytest.raises(
+        ValueError, match="Quote not found or no data available for symbol"
+    ):
+        get_timeseries(req)

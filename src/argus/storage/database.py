@@ -1,7 +1,11 @@
 import duckdb
-from datetime import date
 import pandas as pd
-from argus.domain.internal_models import DataSource, PriceBar, Instrument
+from argus.domain.internal_models import (
+    DataSource,
+    Instrument,
+    MarketDataRequest,
+    MarketDataResponse,
+)
 
 
 def initialize_database(database_path: str) -> None:
@@ -47,7 +51,6 @@ def initialize_database(database_path: str) -> None:
             source_id INTEGER NOT NULL,
             instrument_id INTEGER NOT NULL,
             timestamp DATE NOT NULL,
-            timeframe TEXT NOT NULL,
             close DOUBLE NOT NULL,
             open DOUBLE,
             high DOUBLE,
@@ -56,7 +59,7 @@ def initialize_database(database_path: str) -> None:
             volume DOUBLE,
             FOREIGN KEY (source_id) REFERENCES data_sources (id),
             FOREIGN KEY (instrument_id) REFERENCES instruments (id),
-            UNIQUE (source_id, instrument_id, timestamp, timeframe)
+            UNIQUE (source_id, instrument_id, timestamp,close)
         );
         """,
     ]
@@ -186,13 +189,27 @@ def get_or_create_instrument(connection, instrument: Instrument) -> int:
     return result[0]
 
 
-def insert_price_bar(db: str, price_bar: PriceBar) -> None:
+def insert_price_bar(db: str, marketdata: MarketDataResponse) -> None:
+    """
+    Insert a price bar into the database.
+
+    Ensures that the related data source and instrument exist, then inserts
+    the price bar into the ``price_bars`` table. Duplicate price bars are
+    ignored through the table's unique constraint.
+
+    Args:
+        db (str): Path to the DuckDB database file.
+        price_bar (PriceBar): Price bar model containing source,
+            instrument, timestamp and market values.
+
+    Returns:
+        None
+    """
     insert_query = """
         INSERT INTO price_bars (
             source_id,
             instrument_id,
             timestamp,
-            timeframe,
             close,
             open,
             high,
@@ -200,46 +217,58 @@ def insert_price_bar(db: str, price_bar: PriceBar) -> None:
             adjusted_close,
             volume
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT DO NOTHING;
         """
     connection = duckdb.connect(db)
     try:
-        source_id = get_or_create_source(connection, price_bar.source)
-        instrument_id = get_or_create_instrument(connection, price_bar.instrument)
-        connection.execute(
-            query=insert_query,
-            parameters=[
-                source_id,
-                instrument_id,
-                price_bar.timestamp,
-                price_bar.timeframe,
-                price_bar.close,
-                price_bar.open,
-                price_bar.high,
-                price_bar.low,
-                price_bar.adjusted_close,
-                price_bar.volume,
-            ],
-        )
+        source_id = get_or_create_source(connection, marketdata.source)
+        instrument_id = get_or_create_instrument(connection, marketdata.instrument)
+        if marketdata.bars is None:
+            return None
+        for _, row in marketdata.bars.iterrows():
+            connection.execute(
+                query=insert_query,
+                parameters=[
+                    source_id,
+                    instrument_id,
+                    row["timestamp"],
+                    row["close"],
+                    row["open"],
+                    row["high"],
+                    row["low"],
+                    row["adjusted_close"],
+                    row["volume"],
+                ],
+            )
     finally:
         connection.close()
 
 
-def read_price_bars(
-    db: str,
-    source: DataSource,
-    instrument: Instrument,
-    start_date: date,
-    end_date: date,
-) -> pd.DataFrame:
+def read_price_bars(db: str, request: MarketDataRequest) -> pd.DataFrame:
+    """
+    Read price bars for a source, instrument, and date range.
+
+    Queries stored price bars joined with their data source and instrument
+    metadata. Results are ordered by timestamp and returned as a pandas
+    DataFrame.
+
+    Args:
+        db (str): Path to the DuckDB database file.
+        source (DataSource): Data source used to filter the stored price bars.
+        instrument (Instrument): Instrument used to filter the stored price bars.
+        start_date (date): Inclusive start date of the requested time range.
+        end_date (date): Inclusive end date of the requested time range.
+
+    Returns:
+        pd.DataFrame: DataFrame containing matching price bars and metadata.
+    """
 
     search_query = """
     SELECT
         data_sources.name AS source_name,
         instruments.symbol AS instrument_symbol,
         price_bars.timestamp,
-        price_bars.timeframe,
         price_bars.open,
         price_bars.high,
         price_bars.low,
@@ -260,10 +289,10 @@ def read_price_bars(
         result = connection.execute(
             query=search_query,
             parameters=[
-                source.name,
-                instrument.symbol,
-                start_date,
-                end_date,
+                request.source.name,
+                request.instrument.symbol,
+                request.start,
+                request.end,
             ],
         ).df()
     finally:

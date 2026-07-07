@@ -1,6 +1,7 @@
 import tkinter as tk
+import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from argus.analytics.charts.trend_chart import create_trendchart
+from argus.services.market_data_service import prepare_trend_analysis
 from argus.services.calculator_service import calc, check_op
 from argus.services.conversion_service import convert, check_currency
 from argus.domain.validation import parse_amount
@@ -76,11 +77,6 @@ def show_trend() -> None:
     global trend_canvas
     global trend_chart_widget
 
-    curr_symbol = "EURUSD=X"
-    start = "2024-01-01"
-    end = "2025-01-01"
-    interval = "1d"
-
     calc_frame.pack_forget()
     conv_frame.pack_forget()
     menu_frame.pack_forget()
@@ -90,7 +86,8 @@ def show_trend() -> None:
     content.pack(side="top", fill=tk.BOTH, expand=True)
 
     if trend_canvas is None:
-        fig = create_trendchart(curr_symbol, start, end, interval)
+        df = pd.DataFrame()
+        fig = prepare_trend_analysis(df)
         if fig is None:
             return None
         fig.set_size_inches(7, 4)

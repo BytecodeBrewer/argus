@@ -1,101 +1,66 @@
-from argus.domain.internal_models import DataSource, Instrument, PriceBar
+import pytest
+import pandas as pd
 from datetime import date
+from argus.domain.internal_models import DataSource, Instrument, MarketDataResponse
 
 
-def test_data_source_can_be_created() -> None:
-    source = DataSource(
-        name="yfinance",
-        provider_kind="fx_rates",
+@pytest.fixture
+def valid_source():
+    return DataSource(name="Yahoo", provider_kind="yfinance_api")
+
+
+@pytest.fixture
+def valid_instrument():
+    return Instrument(symbol="AAPL", name="Apple Inc.", asset_class="stock")
+
+
+def test_market_data_response_accepts_valid_dataframe(
+    valid_source, valid_instrument
+) -> None:
+    valid_bar = {
+        "timestamp": [date(2026, 1, 1)],
+        "open": [150.0],
+        "high": [155.0],
+        "low": [149.0],
+        "close": [153.5],
+        "adjusted_close": [153.5],
+        "volume": [1000000.0],
+    }
+    df = pd.DataFrame(valid_bar)
+
+    resp = MarketDataResponse(
+        source=valid_source, instrument=valid_instrument, bars=df, message=""
     )
-
-    assert source.name == "yfinance"
-    assert source.provider_kind == "fx_rates"
-    assert source.requires_api_key is False
+    assert resp.bars.equals(df)
 
 
-def test_instrument_can_be_created() -> None:
-    instrument = Instrument(
-        symbol="EUR/USD",
-        name="Euro / US Dollar",
-        asset_class="fx",
-        base_currency="EUR",
-        quote_currency="USD",
-    )
+def test_market_data_response_raises_error_on_missing_columns(
+    valid_source, valid_instrument
+) -> None:
+    incomplete_bar = {
+        "timestamp": [date(2026, 1, 1)],
+        "close": [153.5],
+    }
+    df = pd.DataFrame(incomplete_bar)
 
-    assert instrument.symbol == "EUR/USD"
-    assert instrument.name == "Euro / US Dollar"
-    assert instrument.asset_class == "fx"
-    assert instrument.base_currency == "EUR"
-    assert instrument.quote_currency == "USD"
-    assert instrument.currency is None
-    assert instrument.exchange is None
+    with pytest.raises(ValueError) as exc_info:
+        MarketDataResponse(
+            source=valid_source, instrument=valid_instrument, bars=df, message=""
+        )
 
-
-def test_rate_bar_can_be_created() -> None:
-    source = DataSource(
-        name="yfinance",
-        provider_kind="fx_rates",
-    )
-
-    instrument_rate = Instrument(
-        symbol="EUR/USD",
-        name="Euro / US Dollar",
-        asset_class="fx",
-        base_currency="EUR",
-        quote_currency="USD",
-    )
-
-    price_bar = PriceBar(
-        source=source,
-        instrument=instrument_rate,
-        timestamp=date(2026, 1, 1),
-        timeframe="1d",
-        close=1.89,
-    )
-
-    assert price_bar.source == source
-    assert price_bar.instrument == instrument_rate
-    assert price_bar.timestamp == date(2026, 1, 1)
-    assert price_bar.timeframe == "1d"
-    assert price_bar.close == 1.89
-    assert price_bar.open is None
-    assert price_bar.high is None
-    assert price_bar.low is None
-    assert price_bar.adjusted_close is None
-    assert price_bar.volume is None
+    assert "Missing required columns" in str(exc_info.value)
 
 
-def test_stock_ohlcv_bar_can_be_created() -> None:
-    source = DataSource(
-        name="yfinance",
-        provider_kind="market_prices",
-    )
+def test_market_data_response_raises_error_if_not_a_dataframe(
+    valid_source, valid_instrument
+) -> None:
+    invalid_input = "I'm just a string :D"
 
-    instrument = Instrument(
-        symbol="AAPL",
-        name="Apple Inc.",
-        asset_class="stock",
-        currency="USD",
-        exchange="NASDAQ",
-    )
+    with pytest.raises(TypeError) as exc_info:
+        MarketDataResponse(
+            source=valid_source,
+            instrument=valid_instrument,
+            bars=invalid_input,  # type: ignore
+        )
 
-    price_bar = PriceBar(
-        source=source,
-        instrument=instrument,
-        timestamp=date(2026, 1, 1),
-        timeframe="1d",
-        open=187.15,
-        high=188.44,
-        low=183.89,
-        close=185.64,
-        adjusted_close=184.25,
-        volume=50_200_000,
-    )
-
-    assert price_bar.instrument.symbol == "AAPL"
-    assert price_bar.open == 187.15
-    assert price_bar.high == 188.44
-    assert price_bar.low == 183.89
-    assert price_bar.close == 185.64
-    assert price_bar.adjusted_close == 184.25
-    assert price_bar.volume == 50_200_000
+    assert "must be a pandas DataFrame" in str(exc_info.value)
