@@ -1,6 +1,11 @@
 import pandas as pd
 from datetime import date
-from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest,MarketDataResponse
+from argus.domain.internal_models import (
+    DataSource,
+    Instrument,
+    MarketDataRequest,
+    MarketDataResponse,
+)
 from argus.clients.yfinance_client import get_timeseries
 from argus.storage.database import read_price_bars
 from argus.analytics.metrics.trend_metrics import (
@@ -56,18 +61,16 @@ def get_market_data(
         DataFrame with dates and rates. Returns
         ``None`` if no time-series data could be fetched.
     """
-    bars = read_price_bars(db,request)
+    bars = read_price_bars(db, request)
     if not (bars.empty):
         db_response = MarketDataResponse(
-            source=request.source,
-            instrument=request.instrument,
-            bars=bars)
+            source=request.source, instrument=request.instrument, bars=bars
+        )
         return db_response
-    
+
     bars = get_timeseries(request)
     if not (bars.empty):
         api_response = MarketDataResponse(
-        source=request.source,
-        instrument=request.instrument,
-        bars=bars)
+            source=request.source, instrument=request.instrument, bars=bars
+        )
         return api_response

@@ -56,3 +56,15 @@ class MarketDataResponse:
     source: DataSource
     instrument: Instrument
     bars: pd.DataFrame
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.bars, pd.DataFrame):
+            raise TypeError("bars must be a pandas DataFrame")
+
+        missing_cols = [
+            col for col in PRICE_BAR_COLUMNS if col not in self.bars.columns
+        ]
+        if missing_cols:
+            raise ValueError(
+                f"Missing required columns in bars DataFrame: {missing_cols}"
+            )
