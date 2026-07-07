@@ -6,12 +6,7 @@ from argus.services.trend_analysis_service import prepare_trend_analysis
 from legacy.services.calculator_service import calc, check_op
 from argus.services.market_data_service import convert
 from argus.domain.validation import parse_amount, check_currency
-from argus.domain.internal_models import (
-    DataSource,
-    Instrument,
-    MarketDataRequest,
-    MarketDataResponse,
-)
+from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest
 
 db = ""
 

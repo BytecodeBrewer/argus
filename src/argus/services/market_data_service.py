@@ -1,7 +1,6 @@
 from argus.domain.internal_models import MarketDataRequest, MarketDataResponse
 from argus.clients.yfinance_client import get_timeseries
 from argus.clients.exchangerate_client import get_rates
-from argus.domain.validation import check_currency
 from argus.storage.database import read_price_bars, insert_price_bar
 import pandas as pd
 
