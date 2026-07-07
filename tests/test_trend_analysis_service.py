@@ -1,3 +1,4 @@
+"""
 import pytest
 import pandas as pd
 from datetime import date
@@ -12,7 +13,7 @@ from argus.services.trend_analysis_service import prepare_trend_analysis
 from argus.services.market_data_service import get_market_data
 from argus.storage.database import initialize_database
 
-"""
+
 @pytest.fixture
 def sample_source():
     return DataSource(
