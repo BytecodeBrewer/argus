@@ -1,12 +1,13 @@
-import requests as req
+import requests as reqs
 from argus.config import (
     EXCHANGE_RATE_BASE_URL,
     EXCHANGE_RATE_API_KEY,
     REQUEST_TIMEOUT_SECONDS,
 )
+from argus.domain.internal_models import MarketDataRequest
 
 
-def get_rates(curr1: str, curr2: str):
+def get_rates(req: MarketDataRequest) -> dict | None:
     """
     Get the exchange rate between two currencies using the ExchangeRate-API.
 
@@ -16,21 +17,23 @@ def get_rates(curr1: str, curr2: str):
 
     Returns: A dictionary containing the result status, error type (if any), and conversion rate (if successful).
     """
+    curr1 = req.instrument.base_currency
+    curr2 = req.instrument.quote_currency
     url = f"{EXCHANGE_RATE_BASE_URL}/{EXCHANGE_RATE_API_KEY}/pair/{curr1}/{curr2}"
     data = {"result": "", "error_type": "", "conversion_rate": None}
 
     try:
-        resp = req.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
+        resp = reqs.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
         resp.raise_for_status()
         payload = resp.json()
 
-    except req.exceptions.Timeout:
+    except reqs.exceptions.Timeout:
         print("API hat zu lange gebraucht.")
         return None
-    except req.exceptions.ConnectionError:
+    except reqs.exceptions.ConnectionError:
         print("Keine Verbindung zur API.")
         return None
-    except req.exceptions.RequestException as error:
+    except reqs.exceptions.RequestException as error:
         print(f"Request fehlgeschlagen: {error}")
         # Request fehlgeschlagen: 403 Client Error: Forbidden for url: https://v6.exchangerate-api.com/v6/None/pair/EUR/USD -> sollte nicht gezeigt werden!!!
         return None
