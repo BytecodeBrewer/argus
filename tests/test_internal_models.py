@@ -28,7 +28,9 @@ def test_market_data_response_accepts_valid_dataframe(
     }
     df = pd.DataFrame(valid_bar)
 
-    resp = MarketDataResponse(source=valid_source, instrument=valid_instrument, bars=df)
+    resp = MarketDataResponse(
+        source=valid_source, instrument=valid_instrument, bars=df, message=""
+    )
     assert resp.bars.equals(df)
 
 
@@ -42,7 +44,9 @@ def test_market_data_response_raises_error_on_missing_columns(
     df = pd.DataFrame(incomplete_bar)
 
     with pytest.raises(ValueError) as exc_info:
-        MarketDataResponse(source=valid_source, instrument=valid_instrument, bars=df)
+        MarketDataResponse(
+            source=valid_source, instrument=valid_instrument, bars=df, message=""
+        )
 
     assert "Missing required columns" in str(exc_info.value)
 
