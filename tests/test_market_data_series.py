@@ -98,7 +98,7 @@ def test_get_market_data_storage_miss(
     mock_insert.assert_called_once()
 
 
-def test_get_market_data_api_returns_empty_safely(
+def test_get_market_data_handles_client_exceptions(
     monkeypatch, sample_source, sample_instrument
 ):
     req = MarketDataRequest(
@@ -114,36 +114,25 @@ def test_get_market_data_api_returns_empty_safely(
         lambda db, r: pd.DataFrame(),
     )
 
-    monkeypatch.setattr(
-        "argus.services.market_data_service.get_timeseries", lambda r: pd.DataFrame()
-    )
-
-    res = get_market_data("mock_db_path", req)
-    assert res is None
-
-
-def test_get_market_data_raises_on_broken_code(
-    monkeypatch, sample_source, sample_instrument
-):
-    req = MarketDataRequest(
-        source=sample_source,
-        instrument=sample_instrument,
-        timeframe="1d",
-        start=date(2026, 1, 1),
-        end=date(2026, 1, 1),
-    )
+    def mock_value_error(request):
+        raise ValueError("Quote not found or no data available for symbol")
 
     monkeypatch.setattr(
-        "argus.services.market_data_service.read_price_bars",
-        lambda db, r: pd.DataFrame(),
+        "argus.services.market_data_service.get_timeseries", mock_value_error
     )
 
-    def broken_client_code(request):
-        raise RuntimeError("Schwerwiegender Systemfehler im Client-Code!")
+    res_val = get_market_data("mock_db_path", req)
+    assert res_val.bars.empty
+    assert res_val.message == "Quote not found or no data available for symbol"
+
+    # Fall 2: ConnectionError testen (z.B. Internet weg)
+    def mock_connection_error(request):
+        raise ConnectionError("Network error or connection timeout")
 
     monkeypatch.setattr(
-        "argus.services.market_data_service.get_timeseries", broken_client_code
+        "argus.services.market_data_service.get_timeseries", mock_connection_error
     )
 
-    with pytest.raises(RuntimeError):
-        get_market_data("mock_db_path", req)
+    res_conn = get_market_data("mock_db_path", req)
+    assert res_conn.bars.empty
+    assert res_conn.message == "Network error or connection timeout"

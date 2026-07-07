@@ -1,12 +1,13 @@
 from argus.domain.internal_models import MarketDataRequest, MarketDataResponse
 from argus.clients.yfinance_client import get_timeseries
 from argus.storage.database import read_price_bars, insert_price_bar
+import pandas as pd
 
 
 def get_market_data(
     db: str,
     request: MarketDataRequest,
-) -> MarketDataResponse | None:
+) -> MarketDataResponse:
     """
     Get a time series either from local stroage or client with first-storage-workflow
 
@@ -26,14 +27,21 @@ def get_market_data(
     bars = read_price_bars(db, request)
     if not (bars.empty):
         db_response = MarketDataResponse(
-            source=request.source, instrument=request.instrument, bars=bars
+            source=request.source, instrument=request.instrument, bars=bars, message=""
         )
         return db_response
 
-    bars = get_timeseries(request)
-    if not (bars.empty):
+    try:
+        bars = get_timeseries(request)
         api_response = MarketDataResponse(
             source=request.source, instrument=request.instrument, bars=bars
         )
         insert_price_bar(db, api_response)
         return api_response
+    except (ConnectionError, ValueError) as e:
+        return MarketDataResponse(
+            source=request.source,
+            instrument=request.instrument,
+            bars=pd.DataFrame(),
+            message=str(e),
+        )

@@ -1,30 +1,35 @@
-import pandas as pd
 from argus.analytics.metrics.trend_metrics import (
     add_rolling_average,
     add_daily_percentage_change,
     get_min_max_rates,
 )
+from matplotlib.figure import Figure
 from argus.analytics.charts.trend_chart import create_trendchart
+from argus.services.market_data_service import get_market_data
+from argus.domain.internal_models import MarketDataRequest
 
 
-def prepare_trend_analysis(df: pd.DataFrame):
+def prepare_trend_analysis(db: str, request: MarketDataRequest) -> Figure | str:
     """
-    Prepare time-series data for trend analysis.
+    Prepare time-series data and generate a trend analysis chart.
 
-    Fetches historical exchange-rate data for the given currency symbol and
-    enriches it with daily percentage changes and a rolling average. It also
-    calculates the minimum and maximum exchange rates for the resulting time
-    series.
+    Enriches the historical exchange-rate DataFrame with daily percentage changes
+    and a rolling average, calculates the minimum and maximum rates, and uses
+    the result to build a trend visualization chart.
 
     Args:
-        df (pd.Dataframe): A timeserie with market data
+        df (pd.DataFrame): A DataFrame containing market data time-series.
 
     Returns:
-        tuple[pd.DataFrame, dict] | None: A tuple containing the prepared
-        DataFrame and a dictionary with minimum and maximum rates. Returns
-        ``None`` if no time-series data could be fetched.
+        plotly.graph_objects.Figure: A figure object representing the
+        generated trend chart.
     """
+    response = get_market_data(db, request)
 
+    if response.message:
+        return response.message
+
+    df = response.bars.copy()
     df = add_daily_percentage_change(df)
     df = add_rolling_average(df)
     min_max_rates = get_min_max_rates(df)
