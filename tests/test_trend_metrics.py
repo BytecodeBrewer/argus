@@ -1,10 +1,12 @@
 import pandas as pd
 import pandas.testing as pdt
 import numpy as np
+import pytest
 from argus.analytics.metrics.trend_metrics import (
     add_daily_percentage_change,
     add_rolling_average,
     get_min_max_rates,
+    get_cumulative_return,
 )
 
 
@@ -60,3 +62,12 @@ def test_get_min_max_():
     result_dict = get_min_max_rates(test_df)
 
     assert result_dict == min_max
+
+def test_get_cumulative_return():
+    test_timesseries = {
+        "date": ["2026-05-01", "2026-05-02", "2026-05-03"],
+        "rate": [1.00, 1.10, 1.21],
+    }
+    test_df=pd.DataFrame(test_timesseries)
+    resault=get_cumulative_return(test_df,"2026-05-01","2026-05-02")
+    assert resault == pytest.approx(10.0)
