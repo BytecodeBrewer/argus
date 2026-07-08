@@ -73,3 +73,26 @@ def get_min_max_rates(df: pd.DataFrame) -> dict:
     min_max["max_date"].append(df.loc[max_id, "date"])
     min_max["max_rate"].append(df.loc[max_id, "rate"])
     return min_max
+
+
+def get_cumulative_return(df:pd.DataFrame,start_date:str,end_date:str)->float:
+    
+    if df.empty:
+        return 0.0
+    start_row=df.loc[df["date"]==start_date]
+    end_row=df.loc[df["date"]==end_date]
+    
+    if start_row.empty or end_row.empty:
+        return 0.0
+
+    start_rate=float(start_row["rate"].iloc[0])
+    end_rate=float(end_row["rate"].iloc[0])
+
+    if start_rate == 0.0:
+        return 0
+
+    return (end_rate - start_rate)/start_rate*100
+
+
+
+
