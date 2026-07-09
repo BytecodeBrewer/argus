@@ -102,7 +102,7 @@ def get_strongest_weakest_days(df: pd.DataFrame, start_date: str, end_date: str)
             "weakest_day": {"date": None, "pct_change": 0.0}
         }
     
-    pct_series = pd.Series(period_df["rate"]).pct_change() * 100
+    pct_series = period_df.loc[:, "rate"].pct_change() * 100
     valid_pct = pct_series.dropna()
     
     if valid_pct.empty:
