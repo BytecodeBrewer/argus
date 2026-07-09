@@ -75,6 +75,11 @@ def test_get_cumulative_return():
     resault=get_cumulative_return(test_df,"2026-05-01","2026-05-02")
     assert resault == pytest.approx(10.0)
 
+    # Egde case
+    empty_df = pd.DataFrame(columns=["date", "rate"])
+    result = get_cumulative_return(empty_df, "2026-05-01", "2026-05-02")
+    assert result == 0.0
+
 def test_get_strongest_weakest_days():
     test_timeseries = {
         "date": ["2026-05-01", "2026-05-02", "2026-05-03", "2026-05-04"],
@@ -87,6 +92,18 @@ def test_get_strongest_weakest_days():
     assert result == {
         "strongest_day": {"date": "2026-05-02", "pct_change": 20.0},
         "weakest_day": {"date": "2026-05-03", "pct_change": -5.0}
+    }
+
+    #Edge case
+    flat_timeseries = {
+        "date": ["2026-05-01", "2026-05-02", "2026-05-03"],
+        "rate": [1.15, 1.15, 1.15],
+    }
+    flat_df = pd.DataFrame(flat_timeseries)
+    result = get_strongest_weakest_days(flat_df, "2026-05-01", "2026-05-03")
+    assert result == {
+        "strongest_day": {"date": "2026-05-02", "pct_change": 0.0},
+        "weakest_day": {"date": "2026-05-02", "pct_change": 0.0}
     }
 
 def test_is_rolling_volatility_added():
