@@ -89,7 +89,7 @@ def get_cumulative_return(df:pd.DataFrame,start_date:str,end_date:str)->float:
     end_rate=float(end_row["rate"].iloc[0])
 
     if start_rate == 0.0:
-        return 0
+        return 0.0
 
     return (end_rate - start_rate)/start_rate*100
 
