@@ -93,6 +93,36 @@ def get_cumulative_return(df:pd.DataFrame,start_date:str,end_date:str)->float:
 
     return (end_rate - start_rate)/start_rate*100
 
-
+def get_strongest_weakest_days(df: pd.DataFrame, start_date: str, end_date: str) -> dict:
+    period_df = df[(df["date"] >= start_date) & (df["date"] <= end_date)]
+    
+    if period_df.empty or len(period_df) < 2:
+        return {
+            "strongest_day": {"date": None, "pct_change": 0.0},
+            "weakest_day": {"date": None, "pct_change": 0.0}
+        }
+    
+    pct_series = pd.Series(period_df["rate"]).pct_change() * 100
+    valid_pct = pct_series.dropna()
+    
+    if valid_pct.empty:
+        return {
+            "strongest_day": {"date": None, "pct_change": 0.0},
+            "weakest_day": {"date": None, "pct_change": 0.0}
+        }
+        
+    max_idx = valid_pct.idxmax()
+    min_idx = valid_pct.idxmin()
+    
+    return {
+        "strongest_day": {
+            "date": period_df.loc[max_idx, "date"],
+            "pct_change": round(float(pct_series.loc[max_idx]), 2)
+        },
+        "weakest_day": {
+            "date": period_df.loc[min_idx, "date"],
+            "pct_change": round(float(pct_series.loc[min_idx]), 2)
+        }
+    }
 
 
