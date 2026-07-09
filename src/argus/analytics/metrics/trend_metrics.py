@@ -125,4 +125,14 @@ def get_strongest_weakest_days(df: pd.DataFrame, start_date: str, end_date: str)
         }
     }
 
+def add_rolling_volatility(df: pd.DataFrame, window: int = 3) -> pd.DataFrame:
+    result = df.copy()
+    
+    daily_returns = result["rate"].pct_change() * 100
+    
+    result["rolling_volatility"] = daily_returns.rolling(window=window, min_periods=1).std()
+    
+    result["rolling_volatility"] = result["rolling_volatility"].fillna(0.0)
+    
+    return result
 
