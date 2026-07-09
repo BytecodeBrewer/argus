@@ -9,7 +9,7 @@ from argus.analytics.metrics.trend_metrics import (
     get_min_max_rates,
     get_cumulative_return,
     get_strongest_weakest_days,
-    add_rolling_volatility
+    add_rolling_volatility,
 )
 
 
@@ -66,13 +66,14 @@ def test_get_min_max_():
 
     assert result_dict == min_max
 
+
 def test_get_cumulative_return():
     test_timesseries = {
         "date": ["2026-05-01", "2026-05-02", "2026-05-03"],
         "rate": [1.00, 1.10, 1.21],
     }
-    test_df=pd.DataFrame(test_timesseries)
-    resault=get_cumulative_return(test_df,"2026-05-01","2026-05-02")
+    test_df = pd.DataFrame(test_timesseries)
+    resault = get_cumulative_return(test_df, "2026-05-01", "2026-05-02")
     assert resault == pytest.approx(10.0)
 
     # Egde case
@@ -80,21 +81,22 @@ def test_get_cumulative_return():
     result = get_cumulative_return(empty_df, "2026-05-01", "2026-05-02")
     assert result == 0.0
 
+
 def test_get_strongest_weakest_days():
     test_timeseries = {
         "date": ["2026-05-01", "2026-05-02", "2026-05-03", "2026-05-04"],
-        "rate": [1.00, 1.20, 1.14, 2.00], 
+        "rate": [1.00, 1.20, 1.14, 2.00],
     }
     test_df = pd.DataFrame(test_timeseries)
-    
+
     result = get_strongest_weakest_days(test_df, "2026-05-01", "2026-05-03")
-    
+
     assert result == {
         "strongest_day": {"date": "2026-05-02", "pct_change": 20.0},
-        "weakest_day": {"date": "2026-05-03", "pct_change": -5.0}
+        "weakest_day": {"date": "2026-05-03", "pct_change": -5.0},
     }
 
-    #Edge case
+    # Edge case
     flat_timeseries = {
         "date": ["2026-05-01", "2026-05-02", "2026-05-03"],
         "rate": [1.15, 1.15, 1.15],
@@ -103,8 +105,9 @@ def test_get_strongest_weakest_days():
     result = get_strongest_weakest_days(flat_df, "2026-05-01", "2026-05-03")
     assert result == {
         "strongest_day": {"date": "2026-05-02", "pct_change": 0.0},
-        "weakest_day": {"date": "2026-05-02", "pct_change": 0.0}
+        "weakest_day": {"date": "2026-05-02", "pct_change": 0.0},
     }
+
 
 def test_is_rolling_volatility_added():
     test_timeseries = {
@@ -112,13 +115,13 @@ def test_is_rolling_volatility_added():
         "rate": [1.00, 2.00, 1.00],
     }
     test_df = pd.DataFrame(test_timeseries)
-    
+
     expect_result = {
         "date": ["2026-05-01", "2026-05-02", "2026-05-03"],
         "rate": [1.00, 2.00, 1.00],
-        "rolling_volatility": [0.0, 0.0, 106.06601717798213]
+        "rolling_volatility": [0.0, 0.0, 106.06601717798213],
     }
     expect_df = pd.DataFrame(expect_result)
     result_df = add_rolling_volatility(test_df, window=2)
-    
+
     pdt.assert_frame_equal(result_df, expect_df)
