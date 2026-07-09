@@ -9,6 +9,7 @@ from argus.analytics.metrics.trend_metrics import (
     get_min_max_rates,
     get_cumulative_return,
     get_strongest_weakest_days,
+    add_rolling_volatility
 )
 
 
@@ -87,3 +88,20 @@ def test_get_strongest_weakest_days():
         "strongest_day": {"date": "2026-05-02", "pct_change": 20.0},
         "weakest_day": {"date": "2026-05-03", "pct_change": -5.0}
     }
+
+def test_is_rolling_volatility_added():
+    test_timeseries = {
+        "date": ["2026-05-01", "2026-05-02", "2026-05-03"],
+        "rate": [1.00, 2.00, 1.00],
+    }
+    test_df = pd.DataFrame(test_timeseries)
+    
+    expect_result = {
+        "date": ["2026-05-01", "2026-05-02", "2026-05-03"],
+        "rate": [1.00, 2.00, 1.00],
+        "rolling_volatility": [0.0, 0.0, 106.06601717798213]
+    }
+    expect_df = pd.DataFrame(expect_result)
+    result_df = add_rolling_volatility(test_df, window=2)
+    
+    pdt.assert_frame_equal(result_df, expect_df)
