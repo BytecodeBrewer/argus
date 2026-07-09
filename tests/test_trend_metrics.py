@@ -7,6 +7,7 @@ from argus.analytics.metrics.trend_metrics import (
     add_rolling_average,
     get_min_max_rates,
     get_cumulative_return,
+    get_strongest_weakest_days,
 )
 
 
@@ -71,3 +72,17 @@ def test_get_cumulative_return():
     test_df=pd.DataFrame(test_timesseries)
     resault=get_cumulative_return(test_df,"2026-05-01","2026-05-02")
     assert resault == pytest.approx(10.0)
+
+def test_get_strongest_weakest_days():
+    test_timeseries = {
+        "date": ["2026-05-01", "2026-05-02", "2026-05-03", "2026-05-04"],
+        "rate": [1.00, 1.20, 1.14, 2.00], 
+    }
+    test_df = pd.DataFrame(test_timeseries)
+    
+    result = get_strongest_weakest_days(test_df, "2026-05-01", "2026-05-03")
+    
+    assert result == {
+        "strongest_day": {"date": "2026-05-02", "pct_change": 20.0},
+        "weakest_day": {"date": "2026-05-03", "pct_change": -5.0}
+    }
