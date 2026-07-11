@@ -92,7 +92,7 @@ def test_get_strongest_weakest_days():
     result = get_strongest_weakest_days(test_df)
 
     assert result == {
-        "strongest_day": {'date': '2026-05-04', 'pct_change': 75.44},
+        "strongest_day": {"date": "2026-05-04", "pct_change": 75.44},
         "weakest_day": {"date": "2026-05-03", "pct_change": -5.0},
     }
 
