@@ -73,3 +73,57 @@ def get_min_max_rates(df: pd.DataFrame) -> dict:
     min_max["max_date"].append(df.loc[max_id, "date"])
     min_max["max_rate"].append(df.loc[max_id, "rate"])
     return min_max
+
+
+def get_cumulative_return(df: pd.DataFrame) -> float:
+    if df.empty:
+        return 0.0
+
+    start_rate = float(df["rate"].iloc[0])
+    end_rate = float(df["rate"].iloc[-1])
+
+    if start_rate == 0.0:
+        return 0.0
+
+    return (end_rate - start_rate) / start_rate * 100
+
+
+def get_strongest_weakest_days(df: pd.DataFrame) -> dict:
+    if df.empty or len(df) < 2:
+        return {
+            "strongest_day": {"date": None, "pct_change": 0.0},
+            "weakest_day": {"date": None, "pct_change": 0.0},
+        }
+
+    pct_series = df.loc[:, "rate"].pct_change() * 100
+    valid_pct = pct_series.dropna()
+
+    if valid_pct.empty:
+        return {
+            "strongest_day": {"date": None, "pct_change": 0.0},
+            "weakest_day": {"date": None, "pct_change": 0.0},
+        }
+
+    max_idx = valid_pct.idxmax()
+    min_idx = valid_pct.idxmin()
+
+    return {
+        "strongest_day": {
+            "date": df.loc[max_idx, "date"],
+            "pct_change": round(float(pct_series.loc[max_idx]), 2),
+        },
+        "weakest_day": {
+            "date": df.loc[min_idx, "date"],
+            "pct_change": round(float(pct_series.loc[min_idx]), 2),
+        },
+    }
+
+
+def add_rolling_volatility(df: pd.DataFrame, window: int = 3) -> pd.DataFrame:
+    result = df.copy()
+    daily_returns = result["rate"].pct_change() * 100
+    result["rolling_volatility"] = daily_returns.rolling(
+        window=window, min_periods=1
+    ).std()
+    result["rolling_volatility"] = result["rolling_volatility"].fillna(0.0)
+    return result
