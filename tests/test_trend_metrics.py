@@ -73,12 +73,12 @@ def test_get_cumulative_return():
         "rate": [1.00, 1.10, 1.21],
     }
     test_df = pd.DataFrame(test_timesseries)
-    resault = get_cumulative_return(test_df, "2026-05-01", "2026-05-02")
-    assert resault == pytest.approx(10.0)
+    resault = get_cumulative_return(test_df)
+    assert resault == pytest.approx(21.0)
 
     # Egde case
     empty_df = pd.DataFrame(columns=["date", "rate"])
-    result = get_cumulative_return(empty_df, "2026-05-01", "2026-05-02")
+    result = get_cumulative_return(empty_df)
     assert result == 0.0
 
 
@@ -89,10 +89,10 @@ def test_get_strongest_weakest_days():
     }
     test_df = pd.DataFrame(test_timeseries)
 
-    result = get_strongest_weakest_days(test_df, "2026-05-01", "2026-05-03")
+    result = get_strongest_weakest_days(test_df)
 
     assert result == {
-        "strongest_day": {"date": "2026-05-02", "pct_change": 20.0},
+        "strongest_day": {'date': '2026-05-04', 'pct_change': 75.44},
         "weakest_day": {"date": "2026-05-03", "pct_change": -5.0},
     }
 
@@ -102,7 +102,7 @@ def test_get_strongest_weakest_days():
         "rate": [1.15, 1.15, 1.15],
     }
     flat_df = pd.DataFrame(flat_timeseries)
-    result = get_strongest_weakest_days(flat_df, "2026-05-01", "2026-05-03")
+    result = get_strongest_weakest_days(flat_df)
     assert result == {
         "strongest_day": {"date": "2026-05-02", "pct_change": 0.0},
         "weakest_day": {"date": "2026-05-02", "pct_change": 0.0},
