@@ -1,4 +1,5 @@
 import requests as reqs
+
 from argus.config import (
     EXCHANGE_RATE_API_KEY,
     EXCHANGE_RATE_BASE_URL,
