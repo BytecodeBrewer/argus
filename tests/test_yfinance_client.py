@@ -1,9 +1,12 @@
-from argus.clients.yfinance_client import get_timeseries
-from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest
 from datetime import date
-import pytest
+
 import pandas as pd
 import pandas.testing as pdt
+import pytest
+from requests.exceptions import RequestException
+
+from argus.clients.yfinance_client import get_timeseries
+from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest
 
 
 @pytest.fixture
@@ -76,7 +79,7 @@ def test_client_network_error(monkeypatch, sample_source, sample_instrument):
     )
 
     def mock_crash(*args, **kwargs):
-        raise Exception()
+        raise RequestException("simulated network error")
 
     monkeypatch.setattr("yfinance.download", mock_crash)
 

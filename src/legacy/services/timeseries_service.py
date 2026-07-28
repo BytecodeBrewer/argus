@@ -1,10 +1,11 @@
 import pandas as pd
-from legacy.clients.mock_client import get_mock_timeseries
+
 from legacy.analytics.metrics.trend_metrics import (
-    add_rolling_average,
     add_daily_percentage_change,
+    add_rolling_average,
     get_min_max_rates,
 )
+from legacy.clients.mock_client import get_mock_timeseries
 
 
 def prepare_trend_analysis(

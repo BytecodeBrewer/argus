@@ -1,6 +1,8 @@
-import pytest
-import pandas as pd
 from datetime import date
+
+import pandas as pd
+import pytest
+
 from argus.domain.internal_models import DataSource, Instrument, MarketDataResponse
 
 

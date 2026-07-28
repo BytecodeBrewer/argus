@@ -1,10 +1,12 @@
 import tkinter as tk
+
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from argus.services.market_data_service import prepare_trend_analysis
-from argus.services.calculator_service import calc, check_op
-from argus.services.conversion_service import convert, check_currency
+
 from argus.domain.validation import parse_amount
+from argus.services.calculator_service import calc, check_op
+from argus.services.conversion_service import check_currency, convert
+from argus.services.market_data_service import prepare_trend_analysis
 
 
 def on_close() -> None:
@@ -89,14 +91,14 @@ def show_trend() -> None:
         df = pd.DataFrame()
         fig = prepare_trend_analysis(df)
         if fig is None:
-            return None
+            return
         fig.set_size_inches(7, 4)
 
         trend_canvas = FigureCanvasTkAgg(fig, master=content)
         trend_chart_widget = trend_canvas.get_tk_widget()
 
     if trend_chart_widget is None:
-        return None
+        return
     trend_canvas.draw()
     trend_chart_widget.pack(fill=tk.BOTH, expand=True)
 

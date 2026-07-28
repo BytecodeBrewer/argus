@@ -1,5 +1,6 @@
 import duckdb
 import pandas as pd
+
 from argus.domain.internal_models import (
     DataSource,
     Instrument,
@@ -225,7 +226,7 @@ def insert_price_bar(db: str, marketdata: MarketDataResponse) -> None:
         source_id = get_or_create_source(connection, marketdata.source)
         instrument_id = get_or_create_instrument(connection, marketdata.instrument)
         if marketdata.bars is None:
-            return None
+            return
         for _, row in marketdata.bars.iterrows():
             connection.execute(
                 query=insert_query,

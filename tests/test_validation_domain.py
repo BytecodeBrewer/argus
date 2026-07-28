@@ -1,8 +1,8 @@
 from argus.domain.validation import (
-    is_valid_op,
     is_valid_curr_code,
-    parse_amount,
+    is_valid_op,
     normalize_input_string,
+    parse_amount,
 )
 
 

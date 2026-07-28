@@ -1,6 +1,8 @@
 import tkinter as tk
+
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 from legacy.analytics.charts.trend_chart import create_trendchart
 
 

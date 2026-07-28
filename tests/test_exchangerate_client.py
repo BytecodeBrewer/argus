@@ -1,6 +1,8 @@
-import requests as req
 from unittest.mock import Mock
-from argus.clients.exchangerate_client import get_rates, check_error
+
+import requests as req
+
+from argus.clients.exchangerate_client import check_error, get_rates
 
 
 def test_check_currency_timeout(monkeypatch):

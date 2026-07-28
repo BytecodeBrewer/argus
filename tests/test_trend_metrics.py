@@ -1,6 +1,7 @@
+import numpy as np
 import pandas as pd
 import pandas.testing as pdt
-import numpy as np
+
 from argus.analytics.metrics.trend_metrics import (
     add_daily_percentage_change,
     add_rolling_average,

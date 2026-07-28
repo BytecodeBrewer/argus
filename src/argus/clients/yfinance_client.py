@@ -1,9 +1,11 @@
-import yfinance as yf
 import pandas as pd
+import yfinance as yf
+from requests.exceptions import RequestException
+
 from argus.domain.internal_models import (
-    MarketDataRequest,
     PRICE_BAR_COLUMNS,
     YFINANCE_PRICE_BAR_MAPPING,
+    MarketDataRequest,
 )
 
 
@@ -24,8 +26,8 @@ def get_timeseries(request: MarketDataRequest) -> pd.DataFrame:
             multi_level_index=False,
             progress=False,
         )
-    except Exception:
-        raise ConnectionError("Network error or connection timeout")
+    except (RequestException, TimeoutError) as exc:
+        raise ConnectionError("Network error or connection timeout") from exc
 
     if raw_resp is None:
         raise ConnectionError("Yahoo Finance API returned an invalid response")
