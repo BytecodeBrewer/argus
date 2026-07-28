@@ -1,9 +1,11 @@
-import requests as req
-import pytest
-from unittest.mock import Mock
 from datetime import date
+from unittest.mock import Mock
+
+import pytest
+import requests as req
+
+from argus.clients.exchangerate_client import check_error, get_rates
 from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest
-from argus.clients.exchangerate_client import get_rates, check_error
 
 
 @pytest.fixture

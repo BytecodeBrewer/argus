@@ -1,12 +1,13 @@
+from matplotlib.figure import Figure
+
+from argus.analytics.charts.trend_chart import create_trendchart
 from argus.analytics.metrics.trend_metrics import (
-    add_rolling_average,
     add_daily_percentage_change,
+    add_rolling_average,
     get_min_max_rates,
 )
-from matplotlib.figure import Figure
-from argus.analytics.charts.trend_chart import create_trendchart
-from argus.services.market_data_service import get_market_data
 from argus.domain.internal_models import MarketDataRequest
+from argus.services.market_data_service import get_market_data
 
 
 def prepare_trend_analysis(db: str, request: MarketDataRequest) -> Figure | str:

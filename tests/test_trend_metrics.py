@@ -1,14 +1,15 @@
+import numpy as np
 import pandas as pd
 import pandas.testing as pdt
-import numpy as np
 import pytest
+
 from argus.analytics.metrics.trend_metrics import (
     add_daily_percentage_change,
     add_rolling_average,
-    get_min_max_rates,
-    get_cumulative_return,
-    get_strongest_weakest_days,
     add_rolling_volatility,
+    get_cumulative_return,
+    get_min_max_rates,
+    get_strongest_weakest_days,
 )
 
 

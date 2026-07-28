@@ -1,7 +1,8 @@
 import requests as reqs
+
 from argus.config import (
-    EXCHANGE_RATE_BASE_URL,
     EXCHANGE_RATE_API_KEY,
+    EXCHANGE_RATE_BASE_URL,
     REQUEST_TIMEOUT_SECONDS,
 )
 from argus.domain.internal_models import MarketDataRequest

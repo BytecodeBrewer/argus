@@ -1,12 +1,14 @@
 import tkinter as tk
 from datetime import date
+
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+
+from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest
+from argus.domain.validation import check_currency, parse_amount
+from argus.services.market_data_service import convert
 from argus.services.trend_analysis_service import prepare_trend_analysis
 from legacy.services.calculator_service import calc, check_op
-from argus.services.market_data_service import convert
-from argus.domain.validation import parse_amount, check_currency
-from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest
 
 db = ""
 
@@ -101,14 +103,14 @@ def show_trend(db: str) -> None:
         )
         fig = prepare_trend_analysis(db, req)
         if not isinstance(fig, Figure):
-            return None
+            return
         fig.set_size_inches(7, 4)
 
         trend_canvas = FigureCanvasTkAgg(fig, master=content)
         trend_chart_widget = trend_canvas.get_tk_widget()
 
     if trend_chart_widget is None:
-        return None
+        return
     trend_canvas.draw()
     trend_chart_widget.pack(fill=tk.BOTH, expand=True)
 

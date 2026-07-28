@@ -1,8 +1,9 @@
-from argus.domain.internal_models import MarketDataRequest, MarketDataResponse
-from argus.clients.yfinance_client import get_timeseries
-from argus.clients.exchangerate_client import get_rates
-from argus.storage.database import read_price_bars, insert_price_bar
 import pandas as pd
+
+from argus.clients.exchangerate_client import get_rates
+from argus.clients.yfinance_client import get_timeseries
+from argus.domain.internal_models import MarketDataRequest, MarketDataResponse
+from argus.storage.database import insert_price_bar, read_price_bars
 
 
 def get_market_data(

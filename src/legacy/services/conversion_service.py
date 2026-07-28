@@ -1,4 +1,4 @@
-from argus.domain.validation import normalize_input_string, is_valid_curr_code
+from argus.domain.validation import is_valid_curr_code, normalize_input_string
 
 
 def check_currency(question: str) -> str | None:
@@ -29,8 +29,7 @@ def get_conv_rate(resp1, resp2) -> float | None:
 
     # data = ex_client.get_rates(req)
 
-    if 0 == 0:
-        return None
+    return None
 
     return None  # float(data["conversion_rate"])
 
