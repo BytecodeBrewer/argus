@@ -75,8 +75,10 @@ def test_client_network_error(monkeypatch, sample_source, sample_instrument):
         end=date(2024, 1, 4),
     )
 
+    from requests.exceptions import RequestException
+
     def mock_crash(*args, **kwargs):
-        raise Exception()
+        raise RequestException("simulated network error")
 
     monkeypatch.setattr("yfinance.download", mock_crash)
 
