@@ -1,5 +1,5 @@
 from argus.clients import exchangerate_client as ex_client
-from argus.domain.validation import normalize_input_string, is_valid_curr_code
+from argus.domain.validation import is_valid_curr_code, normalize_input_string
 
 
 def check_currency(question: str) -> str | None:

@@ -1,7 +1,9 @@
 from datetime import date
-import pytest
+
 import duckdb
 import pandas as pd
+import pytest
+
 from argus.domain.internal_models import (
     DataSource,
     Instrument,

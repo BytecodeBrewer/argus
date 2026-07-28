@@ -9,10 +9,7 @@ def check_op(op: str) -> bool:
 
     Return: bool - True if the operator is valid, otherwise False
     """
-    if is_valid_op(op):
-        return True
-    else:
-        return False
+    return bool(is_valid_op(op))
 
 
 def calc(num1: float, num2: float, op: str) -> float | None:

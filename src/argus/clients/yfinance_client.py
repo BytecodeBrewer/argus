@@ -1,10 +1,11 @@
-import yfinance as yf
 import pandas as pd
+import yfinance as yf
 from requests.exceptions import RequestException
+
 from argus.domain.internal_models import (
-    MarketDataRequest,
     PRICE_BAR_COLUMNS,
     YFINANCE_PRICE_BAR_MAPPING,
+    MarketDataRequest,
 )
 
 
