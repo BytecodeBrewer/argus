@@ -6,8 +6,8 @@ from matplotlib.figure import Figure
 
 from argus.domain.internal_models import DataSource, Instrument, MarketDataRequest
 from argus.domain.validation import check_currency, parse_amount
+from argus.services.analysis_service import prepare_trend_analysis
 from argus.services.market_data_service import convert
-from argus.services.trend_analysis_service import prepare_trend_analysis
 from legacy.services.calculator_service import calc, check_op
 
 db = ""
