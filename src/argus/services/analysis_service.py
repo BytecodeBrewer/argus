@@ -1,12 +1,13 @@
+import numpy as np
 from matplotlib.figure import Figure
-import pandas as pd
+
 from argus.analytics.charts.trend_chart import create_trendchart
-from argus.analytics.predictions.models import create_lin_regression
 from argus.analytics.metrics.trend_metrics import (
     add_daily_percentage_change,
     add_rolling_average,
     get_min_max_rates,
 )
+from argus.analytics.predictions.models import create_lin_regression
 from argus.domain.internal_models import MarketDataRequest
 from argus.services.market_data_service import get_market_data
 
@@ -38,7 +39,8 @@ def prepare_trend_analysis(db: str, request: MarketDataRequest) -> Figure | str:
     fig = create_trendchart(df, min_max_rates)
     return fig
 
-def add_prediction(db: str, request: MarketDataRequest) -> pd.DataFrame:
+
+def add_prediction(db: str, request: MarketDataRequest) -> np.ndarray:
     response = get_market_data(db, request)
     predict_data = create_lin_regression(response.bars)
     return predict_data
