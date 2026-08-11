@@ -5,10 +5,17 @@ from sklearn.linear_model import LinearRegression
 
 def create_lin_regression(df: pd.DataFrame) -> np.ndarray:
     raw_data = df.copy()
+    conv_data = convert_date_to_acc(raw_data)
+    x = conv_data[["days_since_start"]]
+    y = conv_data[["close"]]
 
-    X = np.array(raw_data)
-    y = np.dot(X, np.array([1.21, 1.56])) + 2
+    model = LinearRegression()
+    model.fit(x,y)
+    result = model.predict(x)
+    return result
 
-    reg = LinearRegression().fit(X, y)
-    result = reg.predict(np.array([[1.34, 1.45]]))
+def convert_date_to_acc(df: pd.DataFrame):
+    result = df.copy()
+    result = result.drop(columns=["date"])
+    result["days_since_start"] = range(len(result))
     return result
